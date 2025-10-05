@@ -16,11 +16,11 @@ keyword:
  - unicorn
  - sparkling distributed ledger
 venue:
-  group: WG
+  group: OAuth Working Group
   type: Working Group
   mail: oauth@ietf.org
-  arch: [https://example.com/WG](https://mailarchive.ietf.org/arch/browse/oauth/)
-  github: [USER/REPO](https://github.com/ashayraut/oauth-transactiontokens-for-agents)
+  arch: https://mailarchive.ietf.org/arch/browse/oauth/
+  github: https://github.com/ashayraut/oauth-transactiontokens-for-agents
   latest: https://example.com/LATEST
 
 author:
@@ -44,8 +44,6 @@ TODO Abstract
 
 # Introduction
 
-TODO Introduction
-
 
 # Conventions and Definitions
 
@@ -54,12 +52,8 @@ TODO Introduction
 
 # Security Considerations
 
-TODO Security
-
 
 # IANA Considerations
-
-This document has no IANA actions.
 
 
 --- back
