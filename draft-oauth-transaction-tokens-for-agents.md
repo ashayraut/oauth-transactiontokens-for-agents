@@ -19,11 +19,11 @@
 # Change the file extension to match the format (.xml for XML, etc...)
 #
 ###
-title: "TODO - Your title"
+title: "Transaction Tokens For Agents"
 abbrev: "TODO - Abbreviation"
 category: info
 
-docname: draft-todo-yourname-protocol-latest
+docname: draft-oauth-transaction-tokens-for-agents-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -38,16 +38,16 @@ keyword:
 venue:
   group: WG
   type: Working Group
-  mail: WG@example.com
-  arch: https://example.com/WG
-  github: USER/REPO
+  mail: oauth@ietf.org
+  arch: [https://example.com/WG](https://mailarchive.ietf.org/arch/browse/oauth/)
+  github: [USER/REPO](https://github.com/ashayraut/oauth-transactiontokens-for-agents)
   latest: https://example.com/LATEST
 
 author:
  -
-    fullname: Your Name Here
-    organization: Your Organization Here
-    email: your.email@example.com
+    fullname: ASHAY RAUT
+    organization: Amazon
+    email: asharaut@amazon.com
 
 normative:
 
