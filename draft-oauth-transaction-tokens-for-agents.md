@@ -37,8 +37,16 @@ informative:
 
 --- abstract
 
-TODO Abstract
-
+This document specifies an extension to the OAuth Transaction Tokens
+framework to support agent context propagation within Transaction
+Tokens for agent-based workloads. The extension defines two new
+context fields: 'actor' and 'principal'. The 'actor' field identifies
+the agent performing the action, while the 'principal' field identifies
+the human or system entity that initiated the agent's action. For
+autonomous agents operating independently, the 'principal' field MAY
+be omitted. These additional context fields enable services within
+the call graph to make more granular access control decisions,
+thereby enhancing security.
 
 --- middle
 
