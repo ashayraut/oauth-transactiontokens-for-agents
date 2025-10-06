@@ -38,7 +38,8 @@ informative:
 --- abstract
 
 This document specifies an extension to the OAuth Transaction Tokens
-framework to support agent context propagation within Transaction
+framework (https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
+to support agent context propagation within Transaction
 Tokens for agent-based workloads. The extension defines two new
 context fields: 'actor' and 'principal'. The 'actor' field identifies
 the agent performing the action, while the 'principal' field identifies
@@ -52,7 +53,42 @@ thereby enhancing security.
 
 # Introduction
 
-TODO Introduction
+   Traditional zero trust authorization systems face new challenges when
+   applied to AI agent workloads. Unlike conventional web services,
+   AI agents possess capabilities for autonomous operation, behavioral
+   adaptation, and dynamic integration with various data sources. These
+   characteristics may lead to decisions that extend beyond their
+   initial operational boundaries.
+
+   Existing zero trust models, which effectively manage permissions and
+   access scopes for traditional web services, require enhancement to
+   address the unique properties of AI agents. Authorization systems
+   must evaluate each AI agent interaction independently, considering
+   both the immediate context and intended action. This necessitates
+   more sophisticated approaches to policy enforcement, behavioral
+   monitoring, and audit tracking to maintain security governance.
+
+   Transaction Tokens (Txn-Tokens) are short-lived, signed JSON Web
+   Tokens [RFC7519] that convey identity and authorization context.
+   However, the current Txn-Token format lacks sufficient context for
+   services within the call chain to implement fine-grained access
+   control policies for agent-based workflows. Specifically, it does
+   not provide adequate information about the AI agent's identity or
+   its initiating entity, limiting transaction traceability.
+
+   This document defines two new contexts within the Transaction Token
+   to address these limitations:
+
+   1. The actor context, which identifies the AI agent performing
+      the action
+
+   2. The principal context, which identifies the human or system
+      entity on whose behalf the actor operates
+
+   This extension leverages the existing Txn-Token infrastructure to
+   enable secure propagation of AI agent context throughout the
+   service graph.
+
 
 
 # Conventions and Definitions
