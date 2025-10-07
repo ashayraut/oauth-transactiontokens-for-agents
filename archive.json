@@ -1,0 +1,81 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2025-10-07T01:24:35.084864+00:00",
+  "repo": "ashayraut/oauth-transactiontokens-for-agents",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOP8bteM6sH471",
+      "title": "Update draft-oauth-transaction-tokens-for-agents.md",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/pull/1",
+      "state": "OPEN",
+      "author": "ashayraut",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Test branch to fix yaml errors",
+      "createdAt": "2025-10-05T04:40:04Z",
+      "updatedAt": "2025-10-05T04:40:04Z",
+      "baseRepository": "ashayraut/oauth-transactiontokens-for-agents",
+      "baseRefName": "main",
+      "baseRefOid": "900b03a9322ebc9bbab63573a290a59259ccf68b",
+      "headRepository": "ashayraut/oauth-transactiontokens-for-agents",
+      "headRefName": "ashayraut-patch-1",
+      "headRefOid": "cd71095fde6daba6923f4af6583d6ede4dff5098",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}
