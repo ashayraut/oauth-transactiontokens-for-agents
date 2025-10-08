@@ -89,12 +89,188 @@ thereby enhancing security.
    enable secure propagation of AI agent context throughout the
    service graph.
 
+# Terminology
+
+Agentic-AI: AI Agentic applications are software applications that utilize 
+Large Language Models (LLM)s and plans, reasons,and takes actions independently 
+to achieve complex, multi-step goals with minimal human oversight.
+
+Workload:
+An independent computational unit that can autonomously receive and process 
+invocations, and can generate invocations of other workloads. 
+Examples of workloads include containerized microservices,
+monolithic services and infrastructure services such as managed databases.
+
+Trust Domain:
+A collection of systems, applications, or workloads that share a 
+common security policy. In practice this may include a virtually or 
+physically separated network, which contains two or more workloads.
+The workloads within a Trust Domain may be invoked only through published
+interfaces.
+
+Call Chain:
+A sequence of synchronous invocations that results from the invocation of an external endpoint.
+
+External Endpoint:
+A published interface to a Trust Domain that results in the invocation
+of a workload within the Trust Domain. This is the first service in the 
+call chain where request starts.
+
+Transaction Token (Txn-Token):
+A signed JWT with a short lifetime, providing immutable information about the user or workload,
+certain parameters of the call, and specific contextual attributes of the call.
+The Txn-Token is used to authorize subsequent calls in the call chain.
+
+Transaction Token Service (Txn-Token Service):
+A special service within the Trust Domain that issues Txn-Tokens to requesting 
+workloads. Each Trust Domain using Txn-Tokens MUST have exactly one logical
+Txn-Token Service.
 
 
-# Conventions and Definitions
+# Protocol overview
 
-{::boilerplate bcp14-tagged}
+## Transaction Flow
 
+   This section describes the process by which an agent application
+   obtains a Transaction Token, either acting autonomously or on behalf
+   of a principal. The external endpoint requests a Txn-Token following
+   the procedures defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), augmented with additional
+   context for agent identity and, when applicable, principal identity.
+
+## Agent Application Transaction Flows
+
+   The Transaction Token creation process varies depending on the
+   presence of a principal.
+
+### Principal-Initiated Flow
+
+   When a principal initiates the workflow, the following steps occur:
+
+   1. The principal invokes the agent application to perform a task.
+
+   2. The agent application calls an external endpoint.
+
+   3. The agent application authenticates using an OAuth 2.0 [RFC6749]
+      access token.
+
+   4. The agent application performs OAuth Token Exchange [RFC8693],
+      submitting both actor token and subject token to the
+      Authorization Server.
+
+   5. The external endpoint submits the received access token to the
+      Txn-Token Service.
+
+   6. The Txn-Token Service validates the access token and extracts
+      the principal, actor, and subject identities.
+
+   7. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
+      the access token's 'aud' claim to populate the Txn-Token's
+      'sub' claim.
+
+   8. The Txn-Token Service copies the access token's 'actor' claim
+      to the Txn-Token's 'actor' context. Any nested structure within
+      the 'actor' claim is preserved.
+
+   9. The Txn-Token Service uses the access token's 'sub' claim to
+      populate the Txn-Token's 'principal' context.
+
+### Autonomous Flow
+
+   When the agent application operates autonomously, the following
+   steps occur:
+
+   1. The agent application initiates a task based on an event or
+      scheduled assignment.
+
+   2. The agent application calls an external endpoint.
+
+   3. The agent application authenticates using an OAuth 2.0 [RFC6749]
+      access token.
+
+   4. The external endpoint submits the received access token to the
+      Txn-Token Service.
+
+   5. The Txn-Token Service validates the access token and extracts
+      the actor and subject identities.
+
+   6. As specified in [OAUTH-TXN-TOKENS], the Txn-Token Service uses
+      the access token's 'aud' claim to populate the Txn-Token's
+      'sub' claim.
+
+   7. The Txn-Token Service copies the 'sub' field from within the
+      access token's 'actor' claim to the Txn-Token's 'actor' context.
+      Any nested structure is preserved.
+
+
+## Flow Diagrams
+
+### Principal-Initiated Flow
+
+     Principal    Agent App    External    Txn-Token    Authorization
+                              Endpoint     Service         Server
+        |            |           |            |             |
+        | Invoke     |           |            |             |
+        | agent task |           |            |             |
+        |----------->|           |            |             |
+        |            |           |            |             |
+        |            | Call external API      |             |
+        |            |---------->|            |             |
+        |            |           |            |             |
+        |            | Request access token   |             |
+        |            |---------------------------------->   |
+        |            |           |            |             |
+        |            | Token exchange (actor + subject)     |
+        |            |<----------------------------------|  |
+        |            |           |            |             |
+        |            |           | Request    |             |
+        |            |           | Txn-Token  |             |
+        |            |           |----------->|             |
+        |            |           |            |             |
+        |            |           | Validate token           |
+        |            |           | Extract identities       |
+        |            |           | Set sub, actor,          |
+        |            |           | principal claims         |
+        |            |           |<-----------|             |
+        |            |           |            |             |
+
+### Autonomous Flow
+
+     Agent App    External    Txn-Token    Authorization
+                 Endpoint     Service         Server
+        |           |            |             |
+        | Self-     |            |             |
+        | triggered |            |             |
+        | event     |            |             |
+        |--+        |            |             |
+        |  |        |            |             |
+        |<-+        |            |             |
+        |           |            |             |
+        | Call external API      |             |
+        |---------->|            |             |
+        |           |            |             |
+        | Request access token   |             |
+        |---------------------------------->   |
+        |           |            |             |
+        | Return access token    |             |
+        |<----------------------------------|  |
+        |           |            |             |
+        |           | Request    |             |
+        |           | Txn-Token  |             |
+        |           |----------->|             |
+        |           |            |             |
+        |           | Validate token          |
+        |           | Extract actor/subject   |
+        |           | Set sub and actor      |
+        |           |<-----------|             |
+        |           |            |             |
+
+Legend:
+```
+----> : Request flow
+<---- : Response flow
+   +  : Internal process
+--+   : Self-triggered event
+```
 
 # Security Considerations
 
