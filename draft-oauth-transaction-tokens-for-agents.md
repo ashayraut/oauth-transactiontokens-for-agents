@@ -193,7 +193,7 @@ Txn-Token Service.
    5. The Txn-Token Service validates the access token and extracts
       the actor and subject identities.
 
-   6. As specified in [OAUTH-TXN-TOKENS], the Txn-Token Service uses
+   6. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
       the access token's 'aud' claim to populate the Txn-Token's
       'sub' claim.
 
@@ -272,19 +272,37 @@ Legend:
 --+   : Self-triggered event
 ```
 
-# Security Considerations
+## Replacement tokens
+Txn-Token Service provides capability to get a replacement Txn-Token as defined in the [OAUTH-TXN-TOKENS.replacement flow](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to). If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub' and 'aud' claims.
 
-TODO Security
 
+## Security Considerations
 
-# IANA Considerations
+All the security considerations mentioned in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) apply.
 
-This document has no IANA actions.
+## References
 
+### Normative References
+
+    Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <https://www.rfc-editor.org/rfc/rfc6749>. 
+[RFC7519]
+    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <https://www.rfc-editor.org/rfc/rfc7519>. 
+[RFC7515]
+    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May 2015, <https://www.rfc-editor.org/rfc/rfc7515>. 
+[RFC8693]
+    Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J., and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693, DOI 10.17487/RFC8693, January 2020, <https://www.rfc-editor.org/rfc/rfc8693>. 
+[RFC9068]
+    Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October 2021, <https://www.rfc-editor.org/rfc/rfc9068>. 
+[OAUTH-TXN-TOKENS]]
+    OAuth Transaction Tokens, <https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html>
 
 --- back
 
 # Acknowledgments
 {:numbered="false"}
+The authors would like to thank the contributors and the OAuth working group members who gave valuable input to this draft.
 
-TODO acknowledge.
+# Contributors
+name: Atul Tulshibagwale
+org: SGNL
+email: atul@sgnl.ai
