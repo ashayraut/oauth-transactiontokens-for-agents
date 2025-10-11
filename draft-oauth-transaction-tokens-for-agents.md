@@ -7,7 +7,7 @@ submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
-v:3
+v: 3
 area: AREA
 workgroup: WG Working Group
 keyword:
@@ -285,7 +285,7 @@ All the security considerations mentioned in [OAUTH-TXN-TOKENS](https://drafts.o
 [RFC6749]
     Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <https://www.rfc-editor.org/rfc/rfc6749>. 
     
-[RFC7519]
+[RFC7519](https://tools.ietf.org/html/rfc7519)
     Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <https://www.rfc-editor.org/rfc/rfc7519>. 
     
 [RFC7515]
