@@ -1,6 +1,5 @@
 ---
 title: "Transaction Tokens For Agents"
-abbrev: "TODO - Abbreviation"
 category: info
 
 docname: draft-oauth-transaction-tokens-for-agents-latest
@@ -8,7 +7,7 @@ submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
-v: 3
+v:3
 area: AREA
 workgroup: WG Working Group
 keyword:
@@ -19,9 +18,9 @@ venue:
   group: WG
   type: Working Group
   mail: oauth@ietf.org
-  arch: [https://example.com/WG](https://mailarchive.ietf.org/arch/browse/oauth/)
-  github: [USER/REPO](https://github.com/ashayraut/oauth-transactiontokens-for-agents)
-  latest: https://example.com/LATEST
+  arch: https://mailarchive.ietf.org/arch/browse/oauth
+  github: "ashayraut/oauth-transactiontokens-for-agents"
+  latest: "https://drafts.oauth.net/oauth-transactiontokens-for-agents/draft-oauth-transaction-tokens-for-agents.html"
 
 author:
  -
