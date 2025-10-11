@@ -288,13 +288,13 @@ All the security considerations mentioned in [OAUTH-TXN-TOKENS](https://drafts.o
 [RFC7519](https://tools.ietf.org/html/rfc7519)
     Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <https://www.rfc-editor.org/rfc/rfc7519>. 
     
-[RFC7515]((https://tools.ietf.org/html/rfc7515)
+[RFC7515](https://tools.ietf.org/html/rfc7515)
     Jones, M., Bradley, J., and N. Sakimura, "JSON Web Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May 2015, <https://www.rfc-editor.org/rfc/rfc7515>. 
     
-[RFC8693]((https://tools.ietf.org/html/rfc8693)
+[RFC8693](https://tools.ietf.org/html/rfc8693)
     Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J., and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693, DOI 10.17487/RFC8693, January 2020, <https://www.rfc-editor.org/rfc/rfc8693>. 
     
-[RFC9068]((https://tools.ietf.org/html/rfc9068)
+[RFC9068](https://tools.ietf.org/html/rfc9068)
     Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October 2021, <https://www.rfc-editor.org/rfc/rfc9068>. 
     
 [OAUTH-TXN-TOKENS](https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens)
