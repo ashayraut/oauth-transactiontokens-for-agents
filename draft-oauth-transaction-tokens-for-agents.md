@@ -277,7 +277,46 @@ Txn-Token Service provides capability to get a replacement Txn-Token as defined 
 
 ## Security Considerations
 
-All the security considerations mentioned in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) apply.
+1. All the security considerations mentioned in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) apply.
+
+2. Token Replay Protection Implementations MUST enforce strict token lifetime validation. The short-lived nature of Transaction Tokens helps mitigate replay attacks, but implementations SHOULD also consider:
+   2.1 Implementing token tracking mechanisms within trust domains
+   2.2 Validating token usage context
+
+4. Actor Identity Security
+   3.1. Implementations MUST validate actor claims in tokens
+   3.2. The Txn-Token Service MUST verify the authenticity of actor context before token issuance
+   3.3. During replacement flow, Txn-Token Service MUST not replace actor context in the incoming Txn-Token.
+
+4. Principal Context Protection
+   4.1. Systems MUST prevent unauthorized modifications to principal context during token propagation. Txn-Token is cryptographically signed.
+   4.3. During replacement flow, Txn-Token Service MUST not replace principal context in the incoming Txn-Token.
+
+5. Transaction Chain Integrity
+   5.1. Implementations MUST maintain cryptographic integrity of the token chain
+   5.2. Services MUST validate tokens at trust domain boundaries
+   5.3. Systems MUST implement protection against token tampering during service-to-service communication
+
+6. AI Agent Specific Controls
+   6.1. Implementations MUST enforce scope boundaries for AI agent operations
+   6.2. Systems SHOULD implement behavioral monitoring for AI agent activities by logging actor, principal in logs.
+   6.3. Systems MUST maintain audit trails of AI agent activities
+
+7. Token Transformation Security
+   7.1. The Txn-Token Service MUST validate all claims during access token to Txn-Token conversion
+   7.2. Implementations MUST verify signatures and formats of all tokens
+   7.3. Systems MUST prevent unauthorized manipulation during token transformation
+
+8. Replacement Token Considerations
+   8.1. Systems MUST verify the authenticity and validity of original tokens before replacement
+   8.2. Systems MUST implement controls to prevent unauthorized replacement requests
+
+9. Infrastructure Security
+   9.1. All component communications MUST use secure channels
+   9.2. Implementations MUST enforce strong authentication of the Authorization Server
+   9.3. Systems MUST implement regular rotation of cryptographic keys
+   9.4. Trust domain boundaries MUST be clearly defined and enforced
+
 
 ## References
 
