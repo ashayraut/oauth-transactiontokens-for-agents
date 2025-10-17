@@ -8,19 +8,19 @@ number:
 date:
 consensus: true
 v: 3
-area: AREA
-workgroup: WG Working Group
+# area: AREA
+# workgroup: WG Working Group
 keyword:
  - next generation
  - unicorn
  - sparkling distributed ledger
 venue:
-  group: WG
-  type: Working Group
-  mail: oauth@ietf.org
-  arch: https://mailarchive.ietf.org/arch/browse/oauth
+#  group: WG
+#  type: Working Group
+#  mail: oauth@ietf.org
+#  arch: https://mailarchive.ietf.org/arch/browse/oauth
   github: "ashayraut/oauth-transactiontokens-for-agents"
-  latest: "https://drafts.oauth.net/oauth-transactiontokens-for-agents/draft-oauth-transaction-tokens-for-agents.html"
+  latest: "https://ashayraut.github.io/oauth-transactiontokens-for-agents/draft-oauth-transaction-tokens-for-agents.html"
 
 author:
  -
@@ -90,19 +90,19 @@ thereby enhancing security.
 
 # Terminology
 
-Agentic-AI: AI Agentic applications are software applications that utilize 
-Large Language Models (LLM)s and plans, reasons,and takes actions independently 
+Agentic-AI: AI Agentic applications are software applications that utilize
+Large Language Models (LLM)s and plans, reasons,and takes actions independently
 to achieve complex, multi-step goals with minimal human oversight.
 
 Workload:
-An independent computational unit that can autonomously receive and process 
-invocations, and can generate invocations of other workloads. 
+An independent computational unit that can autonomously receive and process
+invocations, and can generate invocations of other workloads.
 Examples of workloads include containerized microservices,
 monolithic services and infrastructure services such as managed databases.
 
 Trust Domain:
-A collection of systems, applications, or workloads that share a 
-common security policy. In practice this may include a virtually or 
+A collection of systems, applications, or workloads that share a
+common security policy. In practice this may include a virtually or
 physically separated network, which contains two or more workloads.
 The workloads within a Trust Domain may be invoked only through published
 interfaces.
@@ -112,7 +112,7 @@ A sequence of synchronous invocations that results from the invocation of an ext
 
 External Endpoint:
 A published interface to a Trust Domain that results in the invocation
-of a workload within the Trust Domain. This is the first service in the 
+of a workload within the Trust Domain. This is the first service in the
 call chain where request starts.
 
 Transaction Token (Txn-Token):
@@ -121,7 +121,7 @@ certain parameters of the call, and specific contextual attributes of the call.
 The Txn-Token is used to authorize subsequent calls in the call chain.
 
 Transaction Token Service (Txn-Token Service):
-A special service within the Trust Domain that issues Txn-Tokens to requesting 
+A special service within the Trust Domain that issues Txn-Tokens to requesting
 workloads. Each Trust Domain using Txn-Tokens MUST have exactly one logical
 Txn-Token Service.
 
@@ -186,7 +186,7 @@ Txn-Token Service.
       it follows the Client Credentials Grant defined explicitly in [RFC6749](https://tools.ietf.org/html/rfc6749).
 
    5. The agent application uses the access token to call the external endpoint.
-     
+
    7. The external endpoint submits the received access token to the
       Txn-Token Service. Note that this received access token is different rather the access token which
       external endpoint has available to call Txn-Token Service itself. So the received access token is actually a parameter required
@@ -212,50 +212,50 @@ I can help create an RFC-style flow diagram for the Principal-Initiated Flow. He
 Based on the updated flow, here's a more detailed RFC-style flow diagram:
 
 ```
-Principal    Agent App    External    Authorization   Txn-Token    
-                         Endpoint        Server        Service     
-   |            |           |              |             |        
-   | Invoke     |           |              |             |        
-   | agent task |           |              |             |        
-   |----------->|           |              |             |        
-   |            |           |              |             |        
-   |            | Call external API        |             |        
-   |            |---------->|              |             |        
-   |            |           |              |             |        
-   |            |   OAuth Challenge        |             |        
-   |            |<----------|              |             |        
-   |            |           |              |             |        
-   |            | Initiate Auth Code Flow  |             |        
-   |            |------------------------->|             |        
-   |            |           |              |             |        
-   |            | Auth Code                |             |        
-   |            |<-------------------------|             |        
-   |            |           |              |             |        
-   |            | Exchange code for token  |             |        
-   |            |------------------------->|             |        
-   |            |           |              |             |        
-   |            | Access Token (AT1)       |             |        
-   |            | sub, clientId claims     |             |        
-   |            |<-------------------------|             |        
-   |            |           |              |             |        
-   |            | Call with AT1            |             |        
-   |            |---------->|              |             |        
-   |            |           |              |             |        
-   |            |           | Request Txn-Token          |        
-   |            |           | with AT1 as param          |        
-   |            |           |--------------------------->|        
-   |            |           |              |             |        
-   |            |           |              |    Validate AT1     
-   |            |           |              |    Extract claims   
-   |            |           |              |    Set sub from aud 
-   |            |           |              |    Set actor from   
-   |            |           |              |    clientId        
-   |            |           |              |    Set principal    
-   |            |           |              |    from sub        
-   |            |           |              |             |        
-   |            |           | Txn-Token    |             |        
-   |            |           |<---------------------------|        
-   |            |           |              |             |        
+Principal    Agent App    External    Authorization   Txn-Token
+                         Endpoint        Server        Service
+   |            |           |              |             |
+   | Invoke     |           |              |             |
+   | agent task |           |              |             |
+   |----------->|           |              |             |
+   |            |           |              |             |
+   |            | Call external API        |             |
+   |            |---------->|              |             |
+   |            |           |              |             |
+   |            |   OAuth Challenge        |             |
+   |            |<----------|              |             |
+   |            |           |              |             |
+   |            | Initiate Auth Code Flow  |             |
+   |            |------------------------->|             |
+   |            |           |              |             |
+   |            | Auth Code                |             |
+   |            |<-------------------------|             |
+   |            |           |              |             |
+   |            | Exchange code for token  |             |
+   |            |------------------------->|             |
+   |            |           |              |             |
+   |            | Access Token (AT1)       |             |
+   |            | sub, clientId claims     |             |
+   |            |<-------------------------|             |
+   |            |           |              |             |
+   |            | Call with AT1            |             |
+   |            |---------->|              |             |
+   |            |           |              |             |
+   |            |           | Request Txn-Token          |
+   |            |           | with AT1 as param          |
+   |            |           |--------------------------->|
+   |            |           |              |             |
+   |            |           |              |    Validate AT1
+   |            |           |              |    Extract claims
+   |            |           |              |    Set sub from aud
+   |            |           |              |    Set actor from
+   |            |           |              |    clientId
+   |            |           |              |    Set principal
+   |            |           |              |    from sub
+   |            |           |              |             |
+   |            |           | Txn-Token    |             |
+   |            |           |<---------------------------|
+   |            |           |              |             |
 
 Legend:
 ----> : Request flow
@@ -274,46 +274,46 @@ Notes:
 ### Autonomous Flow
 
 ```
-Agent App    External    Authorization   Txn-Token    
-            Endpoint        Server        Service     
-    |           |              |             |        
-    | Self-     |              |             |        
-    | triggered |              |             |        
-    | event     |              |             |        
-    |--+        |              |             |        
-    |  |        |              |             |        
-    |<-+        |              |             |        
-    |           |              |             |        
-    | Call external API        |             |        
-    |---------->|              |             |        
-    |           |              |             |        
-    |   OAuth Challenge        |             |        
-    |<----------|              |             |        
-    |           |              |             |        
-    | Client Credentials Grant |             |        
-    |------------------------->|             |        
-    |           |              |             |        
-    | Access Token (AT1)       |             |        
-    |  sub, aud claims         |             |        
-    |<-------------------------|             |        
-    |           |              |             |        
-    | Call with AT1            |             |        
-    |---------->|              |             |        
-    |           |              |             |        
-    |           | Request Txn-Token          |        
-    |           | with AT1 as param          |        
-    |           |--------------------------->|        
-    |           |              |             |        
-    |           |              |    Validate AT1     
-    |           |              |    Extract claims   
-    |           |              |    Set sub from aud 
-    |           |              |    Set actor from   
-    |           |              |    sub in actor    
-    |           |              |    claim           
-    |           |              |             |        
-    |           | Txn-Token    |             |        
-    |           |<---------------------------|        
-    |           |              |             |        
+Agent App    External    Authorization   Txn-Token
+            Endpoint        Server        Service
+    |           |              |             |
+    | Self-     |              |             |
+    | triggered |              |             |
+    | event     |              |             |
+    |--+        |              |             |
+    |  |        |              |             |
+    |<-+        |              |             |
+    |           |              |             |
+    | Call external API        |             |
+    |---------->|              |             |
+    |           |              |             |
+    |   OAuth Challenge        |             |
+    |<----------|              |             |
+    |           |              |             |
+    | Client Credentials Grant |             |
+    |------------------------->|             |
+    |           |              |             |
+    | Access Token (AT1)       |             |
+    |  sub, aud claims         |             |
+    |<-------------------------|             |
+    |           |              |             |
+    | Call with AT1            |             |
+    |---------->|              |             |
+    |           |              |             |
+    |           | Request Txn-Token          |
+    |           | with AT1 as param          |
+    |           |--------------------------->|
+    |           |              |             |
+    |           |              |    Validate AT1
+    |           |              |    Extract claims
+    |           |              |    Set sub from aud
+    |           |              |    Set actor from
+    |           |              |    sub in actor
+    |           |              |    claim
+    |           |              |             |
+    |           | Txn-Token    |             |
+    |           |<---------------------------|
+    |           |              |             |
 
 Legend:
 ----> : Request flow
@@ -381,23 +381,23 @@ Txn-Token Service provides capability to get a replacement Txn-Token as defined 
 
 ### Normative References
 [RFC6749](https://tools.ietf.org/html/rfc6749)
-    Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <https://www.rfc-editor.org/rfc/rfc6749>. 
-    
+    Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <https://www.rfc-editor.org/rfc/rfc6749>.
+
 [RFC7519](https://tools.ietf.org/html/rfc7519)
-    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <https://www.rfc-editor.org/rfc/rfc7519>. 
-    
+    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <https://www.rfc-editor.org/rfc/rfc7519>.
+
 [RFC7515](https://tools.ietf.org/html/rfc7515)
-    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May 2015, <https://www.rfc-editor.org/rfc/rfc7515>. 
-    
+    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May 2015, <https://www.rfc-editor.org/rfc/rfc7515>.
+
 [RFC8693](https://tools.ietf.org/html/rfc8693)
-    Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J., and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693, DOI 10.17487/RFC8693, January 2020, <https://www.rfc-editor.org/rfc/rfc8693>. 
-    
+    Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J., and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693, DOI 10.17487/RFC8693, January 2020, <https://www.rfc-editor.org/rfc/rfc8693>.
+
 [RFC9068](https://tools.ietf.org/html/rfc9068)
-    Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October 2021, <https://www.rfc-editor.org/rfc/rfc9068>. 
-    
+    Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October 2021, <https://www.rfc-editor.org/rfc/rfc9068>.
+
 [OAUTH-TXN-TOKENS](https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens)
      Atul Tulshibagwale, George Fletcher, Pieter Kasselman, "OAuth Transaction Tokens", <https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html>
-    
+
 
 --- back
 
