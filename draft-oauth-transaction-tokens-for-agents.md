@@ -402,7 +402,6 @@ Txn-Token Service provides capability to get a replacement Txn-Token as defined 
 --- back
 
 # Acknowledgments
-{:numbered="false"}
 The authors would like to thank the contributors and the OAuth working group members who gave valuable input to this draft.
 
 # Contributors
