@@ -147,30 +147,28 @@ Txn-Token Service.
 
    1. The principal invokes the agent application to perform a task.
 
-   2. The agent application calls an external endpoint.
+   2. The agent application calls an external endpoint. External endpoint throws back OAuth challenges.
 
-   3. The agent application authenticates using an OAuth 2.0 [RFC6749](https://tools.ietf.org/html/rfc6749)
-      access token.
-
-   4. The agent application performs OAuth Token Exchange [RFC8693](https://tools.ietf.org/html/rfc8693),
-      submitting both actor token and subject token to the
-      Authorization Server.
+   3. The agent application authenticates using an OAuth 2.0 Auth code flow [RFC6749](https://tools.ietf.org/html/rfc6749)
+      access token. The access token contains subject and clientId claims as per [RFC9068](https://datatracker.ietf.org/doc/rfc9068).
 
    5. The external endpoint submits the received access token to the
-      Txn-Token Service.
+      Txn-Token Service. Note that this received access token is different rather the access token which
+      external endpoint has available to call Txn-Token Service itself. So the received access token is actually a parameter required
+      to call Txn-token Service
 
-   6. The Txn-Token Service validates the access token and extracts
-      the principal, actor, and subject identities.
 
-   7. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
+   6. The Txn-Token Service validates the access token.
+
+   8. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
       the access token's 'aud' claim to populate the Txn-Token's
       'sub' claim.
 
-   8. The Txn-Token Service copies the access token's 'actor' claim
+   9. The Txn-Token Service copies the access token's 'actor' or 'clientId' claim
       to the Txn-Token's 'actor' context. Any nested structure within
       the 'actor' claim is preserved.
 
-   9. The Txn-Token Service uses the access token's 'sub' claim to
+   10. The Txn-Token Service uses the access token's 'sub' claim to
       populate the Txn-Token's 'principal' context.
 
 ### Autonomous Flow
@@ -181,22 +179,27 @@ Txn-Token Service.
    1. The agent application initiates a task based on an event or
       scheduled assignment.
 
-   2. The agent application calls an external endpoint.
+   2. The agent application calls an external endpoint. OAuth challenge flow starts.
 
-   3. The agent application authenticates using an OAuth 2.0 [RFC6749](https://tools.ietf.org/html/rfc6749)
-      access token.
+   3. The agent application authenticates using an OAuth 2.0 [RFC6749](https://tools.ietf.org/html/rfc6749). When an autonomous agent
+      (no human resource owner) needs to call another resource server using OAuth,
+      it follows the Client Credentials Grant defined explicitly in [RFC6749](https://tools.ietf.org/html/rfc6749).
 
-   4. The external endpoint submits the received access token to the
-      Txn-Token Service.
+   5. The agent application uses the access token to call the external endpoint.
+     
+   7. The external endpoint submits the received access token to the
+      Txn-Token Service. Note that this received access token is different rather the access token which
+      external endpoint has available to call Txn-Token Service itself. So the received access token is actually a parameter required
+      to call Txn-token Service
 
-   5. The Txn-Token Service validates the access token and extracts
+   9. The Txn-Token Service validates the access token and extracts
       the actor and subject identities.
 
-   6. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
+   10. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
       the access token's 'aud' claim to populate the Txn-Token's
       'sub' claim.
 
-   7. The Txn-Token Service copies the 'sub' field from within the
+   11. The Txn-Token Service copies the 'sub' field from within the
       access token's 'actor' claim to the Txn-Token's 'actor' context.
       Any nested structure is preserved.
 
@@ -204,71 +207,127 @@ Txn-Token Service.
 ## Flow Diagrams
 
 ### Principal-Initiated Flow
+I can help create an RFC-style flow diagram for the Principal-Initiated Flow. Here's an ASCII art diagram following RFC conventions:
 
-     Principal    Agent App    External    Txn-Token    Authorization
-                              Endpoint     Service         Server
-        |            |           |            |             |
-        | Invoke     |           |            |             |
-        | agent task |           |            |             |
-        |----------->|           |            |             |
-        |            |           |            |             |
-        |            | Call external API      |             |
-        |            |---------->|            |             |
-        |            |           |            |             |
-        |            | Request access token   |             |
-        |            |---------------------------------->   |
-        |            |           |            |             |
-        |            | Token exchange (actor + subject)     |
-        |            |<----------------------------------|  |
-        |            |           |            |             |
-        |            |           | Request    |             |
-        |            |           | Txn-Token  |             |
-        |            |           |----------->|             |
-        |            |           |            |             |
-        |            |           | Validate token           |
-        |            |           | Extract identities       |
-        |            |           | Set sub, actor,          |
-        |            |           | principal claims         |
-        |            |           |<-----------|             |
-        |            |           |            |             |
+Based on the updated flow, here's a more detailed RFC-style flow diagram:
+
+```
+Principal    Agent App    External    Authorization   Txn-Token    
+                         Endpoint        Server        Service     
+   |            |           |              |             |        
+   | Invoke     |           |              |             |        
+   | agent task |           |              |             |        
+   |----------->|           |              |             |        
+   |            |           |              |             |        
+   |            | Call external API        |             |        
+   |            |---------->|              |             |        
+   |            |           |              |             |        
+   |            |   OAuth Challenge        |             |        
+   |            |<----------|              |             |        
+   |            |           |              |             |        
+   |            | Initiate Auth Code Flow  |             |        
+   |            |------------------------->|             |        
+   |            |           |              |             |        
+   |            | Auth Code                |             |        
+   |            |<-------------------------|             |        
+   |            |           |              |             |        
+   |            | Exchange code for token  |             |        
+   |            |------------------------->|             |        
+   |            |           |              |             |        
+   |            | Access Token (AT1)       |             |        
+   |            | [sub, clientId claims]   |             |        
+   |            |<-------------------------|             |        
+   |            |           |              |             |        
+   |            | Call with AT1           |              |        
+   |            |---------->|              |             |        
+   |            |           |              |             |        
+   |            |           | Request Txn-Token         |        
+   |            |           | [with AT1 as param]      |        
+   |            |           |--------------------------->|        
+   |            |           |              |             |        
+   |            |           |              |    Validate AT1     
+   |            |           |              |    Extract claims   
+   |            |           |              |    Set sub from aud 
+   |            |           |              |    Set actor from   
+   |            |           |              |    clientId        
+   |            |           |              |    Set principal    
+   |            |           |              |    from sub        
+   |            |           |              |             |        
+   |            |           | Txn-Token    |             |        
+   |            |           |<---------------------------|        
+   |            |           |              |             |        
+
+Legend:
+----> : Request flow
+<---- : Response flow
+  |   : Component boundary
+```
+
+Notes:
+1. AT1 refers to the access token obtained by Agent App
+2. The External Endpoint uses its own access token to call Txn-Token Service
+3. AT1 is passed as a parameter in the Txn-Token request
+4. The flow shows detailed OAuth 2.0 Authorization Code flow steps
+5. Token validation and claim extraction steps are shown in the Txn-Token Service
+
 
 ### Autonomous Flow
 
-     Agent App    External    Txn-Token    Authorization
-                 Endpoint     Service         Server
-        |           |            |             |
-        | Self-     |            |             |
-        | triggered |            |             |
-        | event     |            |             |
-        |--+        |            |             |
-        |  |        |            |             |
-        |<-+        |            |             |
-        |           |            |             |
-        | Call external API      |             |
-        |---------->|            |             |
-        |           |            |             |
-        | Request access token   |             |
-        |---------------------------------->   |
-        |           |            |             |
-        | Return access token    |             |
-        |<----------------------------------|  |
-        |           |            |             |
-        |           | Request    |             |
-        |           | Txn-Token  |             |
-        |           |----------->|             |
-        |           |            |             |
-        |           | Validate token          |
-        |           | Extract actor/subject   |
-        |           | Set sub and actor      |
-        |           |<-----------|             |
-        |           |            |             |
+```
+Agent App    External    Authorization   Txn-Token    
+            Endpoint        Server        Service     
+    |           |              |             |        
+    | Self-     |              |             |        
+    | triggered |              |             |        
+    | event     |              |             |        
+    |--+        |              |             |        
+    |  |        |              |             |        
+    |<-+        |              |             |        
+    |           |              |             |        
+    | Call external API        |             |        
+    |---------->|              |             |        
+    |           |              |             |        
+    |   OAuth Challenge        |             |        
+    |<----------|              |             |        
+    |           |              |             |        
+    | Client Credentials Grant |             |        
+    |------------------------->|             |        
+    |           |              |             |        
+    | Access Token (AT1)       |             |        
+    | [sub, aud claims]        |             |        
+    |<-------------------------|             |        
+    |           |              |             |        
+    | Call with AT1           |              |        
+    |---------->|              |             |        
+    |           |              |             |        
+    |           | Request Txn-Token         |        
+    |           | [with AT1 as param]      |        
+    |           |--------------------------->|        
+    |           |              |             |        
+    |           |              |    Validate AT1     
+    |           |              |    Extract claims   
+    |           |              |    Set sub from aud 
+    |           |              |    Set actor from   
+    |           |              |    sub in actor    
+    |           |              |    claim           
+    |           |              |             |        
+    |           | Txn-Token    |             |        
+    |           |<---------------------------|        
+    |           |              |             |        
 
 Legend:
-```
 ----> : Request flow
 <---- : Response flow
-   +  : Internal process
+  |   : Component boundary
+  +   : Internal process
 --+   : Self-triggered event
+
+Notes:
+* AT1: Access token obtained via Client Credentials Grant
+* External Endpoint uses its own credentials for Txn-Token Service
+* AT1 is included as parameter in Txn-Token request
+* Self-triggered events can be scheduled tasks or external triggers
+* Token validation includes signature and claims verification
 ```
 
 ## Replacement tokens
