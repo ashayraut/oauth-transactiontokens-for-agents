@@ -235,14 +235,14 @@ Principal    Agent App    External    Authorization   Txn-Token
    |            |------------------------->|             |        
    |            |           |              |             |        
    |            | Access Token (AT1)       |             |        
-   |            | [sub, clientId claims]   |             |        
+   |            | sub, clientId claims     |             |        
    |            |<-------------------------|             |        
    |            |           |              |             |        
-   |            | Call with AT1           |              |        
+   |            | Call with AT1            |             |        
    |            |---------->|              |             |        
    |            |           |              |             |        
-   |            |           | Request Txn-Token         |        
-   |            |           | [with AT1 as param]      |        
+   |            |           | Request Txn-Token          |        
+   |            |           | with AT1 as param          |        
    |            |           |--------------------------->|        
    |            |           |              |             |        
    |            |           |              |    Validate AT1     
@@ -294,14 +294,14 @@ Agent App    External    Authorization   Txn-Token
     |------------------------->|             |        
     |           |              |             |        
     | Access Token (AT1)       |             |        
-    | [sub, aud claims]        |             |        
+    |  sub, aud claims         |             |        
     |<-------------------------|             |        
     |           |              |             |        
-    | Call with AT1           |              |        
+    | Call with AT1            |             |        
     |---------->|              |             |        
     |           |              |             |        
-    |           | Request Txn-Token         |        
-    |           | [with AT1 as param]      |        
+    |           | Request Txn-Token          |        
+    |           | with AT1 as param          |        
     |           |--------------------------->|        
     |           |              |             |        
     |           |              |    Validate AT1     
