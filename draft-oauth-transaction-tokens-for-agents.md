@@ -210,8 +210,7 @@ Txn-Token Service.
 
 Based on the updated flow, here's a more detailed RFC-style flow diagram:
 
-<pre><code>
-```
+~~~ ascii-art
 Principal    Agent App    External    Authorization   Txn-Token
                          Endpoint        Server        Service
    |            |           |              |             |
@@ -261,9 +260,7 @@ Legend:
 ----> : Request flow
 <---- : Response flow
   |   : Component boundary
-```
-
-</code></pre>
+~~~
 
 Notes:
 1. AT1 refers to the access token obtained by Agent App
@@ -275,8 +272,8 @@ Notes:
 
 ### Autonomous Flow
 
-<pre><code>
-```
+
+~~~ ascii-art
 Agent App    External    Authorization   Txn-Token
             Endpoint        Server        Service
     |           |              |             |
@@ -331,7 +328,7 @@ Notes:
 * AT1 is included as parameter in Txn-Token request
 * Self-triggered events can be scheduled tasks or external triggers
 * Token validation includes signature and claims verification
-```
+~~~
 </code></pre>
 
 ## Replacement tokens
