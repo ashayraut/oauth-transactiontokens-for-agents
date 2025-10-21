@@ -207,7 +207,6 @@ Txn-Token Service.
 ## Flow Diagrams
 
 ### Principal-Initiated Flow
-I can help create an RFC-style flow diagram for the Principal-Initiated Flow. Here's an ASCII art diagram following RFC conventions:
 
 Based on the updated flow, here's a more detailed RFC-style flow diagram:
 
