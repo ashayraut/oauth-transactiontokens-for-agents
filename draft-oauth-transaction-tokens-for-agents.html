@@ -1427,7 +1427,8 @@ the actor and subject identities.<a href="#section-3.2.2-2.6.1" class="pilcrow">
 <a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-principal-initiated-flow-2" class="section-name selfRef">Principal-Initiated Flow</a>
           </h4>
 <p id="section-3.3.1-1">Based on the updated flow, here's a more detailed RFC-style flow diagram:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.3.1-2">```
+<div class="alignLeft art-ascii-art art-text artwork" id="section-3.3.1-2">
+<pre>
 Principal    Agent App    External    Authorization   Txn-Token
                          Endpoint        Server        Service
    |            |           |              |             |
@@ -1471,18 +1472,20 @@ Principal    Agent App    External    Authorization   Txn-Token
    |            |           |              |             |
    |            |           | Txn-Token    |             |
    |            |           |&lt;---------------------------|
-   |            |           |              |             |<a href="#section-3.3.1-2" class="pilcrow">¶</a></p>
-<p id="section-3.3.1-3">Legend:
+   |            |           |              |             |
+
+Legend:
 ----&gt; : Request flow
 &lt;---- : Response flow
   |   : Component boundary
-```<a href="#section-3.3.1-3" class="pilcrow">¶</a></p>
-<p id="section-3.3.1-4">Notes:
+</pre><a href="#section-3.3.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3.1-3">Notes:
 1. AT1 refers to the access token obtained by Agent App
 2. The External Endpoint uses its own access token to call Txn-Token Service
 3. AT1 is passed as a parameter in the Txn-Token request
 4. The flow shows detailed OAuth 2.0 Authorization Code flow steps
-5. Token validation and claim extraction steps are shown in the Txn-Token Service<a href="#section-3.3.1-4" class="pilcrow">¶</a></p>
+5. Token validation and claim extraction steps are shown in the Txn-Token Service<a href="#section-3.3.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="autonomous-flow-1">
@@ -1490,7 +1493,8 @@ Principal    Agent App    External    Authorization   Txn-Token
           <h4 id="name-autonomous-flow-2">
 <a href="#section-3.3.2" class="section-number selfRef">3.3.2. </a><a href="#name-autonomous-flow-2" class="section-name selfRef">Autonomous Flow</a>
           </h4>
-<p id="section-3.3.2-1">```
+<div class="alignLeft art-ascii-art art-text artwork" id="section-3.3.2-1">
+<pre>
 Agent App    External    Authorization   Txn-Token
             Endpoint        Server        Service
     |           |              |             |
@@ -1530,20 +1534,24 @@ Agent App    External    Authorization   Txn-Token
     |           |              |             |
     |           | Txn-Token    |             |
     |           |&lt;---------------------------|
-    |           |              |             |<a href="#section-3.3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.3.2-2">Legend:
+    |           |              |             |
+
+Legend:
 ----&gt; : Request flow
 &lt;---- : Response flow
   |   : Component boundary
   +   : Internal process
---+   : Self-triggered event<a href="#section-3.3.2-2" class="pilcrow">¶</a></p>
-<p id="section-3.3.2-3">Notes:
+--+   : Self-triggered event
+
+Notes:
 * AT1: Access token obtained via Client Credentials Grant
 * External Endpoint uses its own credentials for Txn-Token Service
 * AT1 is included as parameter in Txn-Token request
 * Self-triggered events can be scheduled tasks or external triggers
 * Token validation includes signature and claims verification
-```<a href="#section-3.3.2-3" class="pilcrow">¶</a></p>
+</pre><a href="#section-3.3.2-1" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3.2-2">&lt;/code&gt;&lt;/pre&gt;<a href="#section-3.3.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>

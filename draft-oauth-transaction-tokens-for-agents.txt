@@ -264,26 +264,55 @@ Table of Contents
    Based on the updated flow, here's a more detailed RFC-style flow
    diagram:
 
-   ``` Principal Agent App External Authorization Txn-Token Endpoint
-   Server Service | | | | | | Invoke | | | | | agent
-   task | | | | |----------->| | | | | | | | | | | Call external
-   API | | | |---------->| | | | | | | | | | OAuth
-   Challenge | | | |<----------| | | | | | | | | | Initiate Auth Code
-   Flow | | | |------------------------->| | | | | | | | | Auth
-   Code | | | |<-------------------------| | | | | | | | | Exchange code
-   for token | | | |------------------------->| | | | | | | | | Access
-   Token (AT1) | | | | sub, clientId
-   claims | | | |<-------------------------| | | | | | | | | Call with
-   AT1 | | | |---------->| | | | | | | | | | | Request Txn-Token | | | |
-   with AT1 as
-   param | | | |--------------------------->| | | | | | | | | | Validate
-   AT1 | | | | Extract claims | | | | Set sub from aud | | | | Set actor
-   from | | | | clientId | | | | Set principal | | | | from
-   sub | | | | | | | | Txn-
-   Token | | | | |<---------------------------| | | | | |
+   Principal    Agent App    External    Authorization   Txn-Token
+                            Endpoint        Server        Service
+      |            |           |              |             |
+      | Invoke     |           |              |             |
+      | agent task |           |              |             |
+      |----------->|           |              |             |
+      |            |           |              |             |
+      |            | Call external API        |             |
+      |            |---------->|              |             |
+      |            |           |              |             |
+      |            |   OAuth Challenge        |             |
+      |            |<----------|              |             |
+      |            |           |              |             |
+      |            | Initiate Auth Code Flow  |             |
+      |            |------------------------->|             |
+      |            |           |              |             |
+      |            | Auth Code                |             |
+      |            |<-------------------------|             |
+      |            |           |              |             |
+      |            | Exchange code for token  |             |
+      |            |------------------------->|             |
+      |            |           |              |             |
+      |            | Access Token (AT1)       |             |
+      |            | sub, clientId claims     |             |
+      |            |<-------------------------|             |
+      |            |           |              |             |
+      |            | Call with AT1            |             |
+      |            |---------->|              |             |
+      |            |           |              |             |
+      |            |           | Request Txn-Token          |
+      |            |           | with AT1 as param          |
+      |            |           |--------------------------->|
+      |            |           |              |             |
+      |            |           |              |    Validate AT1
+      |            |           |              |    Extract claims
+      |            |           |              |    Set sub from aud
+      |            |           |              |    Set actor from
+      |            |           |              |    clientId
+      |            |           |              |    Set principal
+      |            |           |              |    from sub
+      |            |           |              |             |
+      |            |           | Txn-Token    |             |
+      |            |           |<---------------------------|
+      |            |           |              |             |
 
-   Legend: ----> : Request flow <---- : Response flow | : Component
-   boundary ```
+   Legend:
+   ----> : Request flow
+   <---- : Response flow
+     |   : Component boundary
 
    Notes: 1.  AT1 refers to the access token obtained by Agent App 2.
    The External Endpoint uses its own access token to call Txn-Token
@@ -294,28 +323,62 @@ Table of Contents
 
 3.3.2.  Autonomous Flow
 
-   ``` Agent App External Authorization Txn-Token Endpoint Server
-   Service | | | | | Self- | | | | triggered | | | |
-   event | | | |--+ | | | | | | | | |<-+ | | | | | | | | Call external
-   API | | |---------->| | | | | | | | OAuth
-   Challenge | | |<----------| | | | | | | | Client Credentials
-   Grant | | |------------------------->| | | | | | | Access Token
-   (AT1) | | | sub, aud
-   claims | | |<-------------------------| | | | | | | Call with
-   AT1 | | |---------->| | | | | | | | | Request Txn-Token | | | with
-   AT1 as param | | |--------------------------->| | | | | | | |
-   Validate AT1 | | | Extract claims | | | Set sub from aud | | | Set
-   actor from | | | sub in actor | | | claim | | | | | | Txn-
-   Token | | | |<---------------------------| | | | |
+   Agent App    External    Authorization   Txn-Token
+               Endpoint        Server        Service
+       |           |              |             |
+       | Self-     |              |             |
+       | triggered |              |             |
+       | event     |              |             |
+       |--+        |              |             |
+       |  |        |              |             |
+       |<-+        |              |             |
+       |           |              |             |
+       | Call external API        |             |
+       |---------->|              |             |
+       |           |              |             |
+       |   OAuth Challenge        |             |
+       |<----------|              |             |
+       |           |              |             |
+       | Client Credentials Grant |             |
+       |------------------------->|             |
+       |           |              |             |
+       | Access Token (AT1)       |             |
+       |  sub, aud claims         |             |
+       |<-------------------------|             |
+       |           |              |             |
+       | Call with AT1            |             |
+       |---------->|              |             |
+       |           |              |             |
+       |           | Request Txn-Token          |
+       |           | with AT1 as param          |
+       |           |--------------------------->|
+       |           |              |             |
+       |           |              |    Validate AT1
+       |           |              |    Extract claims
+       |           |              |    Set sub from aud
+       |           |              |    Set actor from
+       |           |              |    sub in actor
+       |           |              |    claim
+       |           |              |             |
+       |           | Txn-Token    |             |
+       |           |<---------------------------|
+       |           |              |             |
 
-   Legend: ----> : Request flow <---- : Response flow | : Component
-   boundary + : Internal process --+ : Self-triggered event
+   Legend:
+   ----> : Request flow
+   <---- : Response flow
+     |   : Component boundary
+     +   : Internal process
+   --+   : Self-triggered event
 
-   Notes: * AT1: Access token obtained via Client Credentials Grant *
-   External Endpoint uses its own credentials for Txn-Token Service *
-   AT1 is included as parameter in Txn-Token request * Self-triggered
-   events can be scheduled tasks or external triggers * Token validation
-   includes signature and claims verification ```
+   Notes:
+   * AT1: Access token obtained via Client Credentials Grant
+   * External Endpoint uses its own credentials for Txn-Token Service
+   * AT1 is included as parameter in Txn-Token request
+   * Self-triggered events can be scheduled tasks or external triggers
+   * Token validation includes signature and claims verification
+
+   </code></pre>
 
 3.4.  Replacement tokens
 
