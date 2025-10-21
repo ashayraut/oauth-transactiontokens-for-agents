@@ -2,10 +2,10 @@
 
 
 
-WG Working Group                                                 A. RAUT
+Network Working Group                                            A. RAUT
 Internet-Draft                                                    Amazon
-Intended status: Informational                           17 October 2025
-Expires: 20 April 2026
+Intended status: Informational                           21 October 2025
+Expires: 24 April 2026
 
 
                      Transaction Tokens For Agents
@@ -31,15 +31,10 @@ About This Document
    This note is to be removed before publishing as an RFC.
 
    The latest revision of this draft can be found at
-   https://drafts.oauth.net/oauth-transactiontokens-for-agents/draft-
+   https://ashayraut.github.io/oauth-transactiontokens-for-agents/draft-
    oauth-transaction-tokens-for-agents.html.  Status information for
    this document may be found at https://datatracker.ietf.org/doc/draft-
    oauth-transaction-tokens-for-agents/.
-
-   Discussion of this document takes place on the WG Working Group
-   mailing list (mailto:oauth@ietf.org), which is archived at
-   https://mailarchive.ietf.org/arch/browse/oauth.  Subscribe at
-   https://www.ietf.org/mailman/listinfo/oauth/.
 
    Source for this draft and an issue tracker can be found at
    https://github.com/ashayraut/oauth-transactiontokens-for-agents.
@@ -59,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 April 2026.
+   This Internet-Draft will expire on 24 April 2026.
 
 Copyright Notice
 
@@ -266,56 +261,26 @@ Table of Contents
 
 3.3.1.  Principal-Initiated Flow
 
-   I can help create an RFC-style flow diagram for the Principal-
-   Initiated Flow.  Here's an ASCII art diagram following RFC
-   conventions:
-
    Based on the updated flow, here's a more detailed RFC-style flow
    diagram:
 
-   ``` Principal Agent App External Authorization Txn-Token
-   Endpoint Server Service
-   | | | | |
-   | Invoke | | | |
-   | agent task | | | |
-   |----------->| | | |
-   | | | | |
-   | | Call external API | |
-   | |---------->| | |
-   | | | | |
-   | | OAuth Challenge | |
-   | |<----------| | |
-   | | | | |
-   | | Initiate Auth Code Flow | |
-   | |------------------------->| |
-   | | | | |
-   | | Auth Code | |
-   | |<-------------------------| |
-   | | | | |
-   | | Exchange code for token | |
-   | |------------------------->| |
-   | | | | |
-   | | Access Token (AT1) | |
-   | | sub, clientId claims | |
-   | |<-------------------------| |
-   | | | | |
-   | | Call with AT1 | |
-   | |---------->| | |
-   | | | | |
-   | | | Request Txn-Token |
-   | | | with AT1 as param |
-   | | |--------------------------->|
-   | | | | |
-   | | | | Validate AT1
-   | | | | Extract claims
-   | | | | Set sub from aud | | | | Set actor from
-   | | | | clientId
-   | | | | Set principal
-   | | | | from sub
-   | | | | |
-   | | | Txn-Token | |
-   | | |<---------------------------|
-   | | | | |
+   ``` Principal Agent App External Authorization Txn-Token Endpoint
+   Server Service | | | | | | Invoke | | | | | agent
+   task | | | | |----------->| | | | | | | | | | | Call external
+   API | | | |---------->| | | | | | | | | | OAuth
+   Challenge | | | |<----------| | | | | | | | | | Initiate Auth Code
+   Flow | | | |------------------------->| | | | | | | | | Auth
+   Code | | | |<-------------------------| | | | | | | | | Exchange code
+   for token | | | |------------------------->| | | | | | | | | Access
+   Token (AT1) | | | | sub, clientId
+   claims | | | |<-------------------------| | | | | | | | | Call with
+   AT1 | | | |---------->| | | | | | | | | | | Request Txn-Token | | | |
+   with AT1 as
+   param | | | |--------------------------->| | | | | | | | | | Validate
+   AT1 | | | | Extract claims | | | | Set sub from aud | | | | Set actor
+   from | | | | clientId | | | | Set principal | | | | from
+   sub | | | | | | | | Txn-
+   Token | | | | |<---------------------------| | | | | |
 
    Legend: ----> : Request flow <---- : Response flow | : Component
    boundary ```
@@ -329,45 +294,19 @@ Table of Contents
 
 3.3.2.  Autonomous Flow
 
-   ``` Agent App External Authorization Txn-Token
-   Endpoint Server Service
-   | | | |
-   | Self- | | |
-   | triggered | | |
-   | event | | |
-   |--+ | | |
-   | | | | |
-   |<-+ | | |
-   | | | |
-   | Call external API | |
-   |---------->| | |
-   | | | |
-   | OAuth Challenge | |
-   |<----------| | |
-   | | | |
-   | Client Credentials Grant | |
-   |------------------------->| |
-   | | | |
-   | Access Token (AT1) | |
-   | sub, aud claims | |
-   |<-------------------------| |
-   | | | |
-   | Call with AT1 | |
-   |---------->| | |
-   | | | |
-   | | Request Txn-Token |
-   | | with AT1 as param |
-   | |--------------------------->|
-   | | | |
-   | | | Validate AT1
-   | | | Extract claims
-   | | | Set sub from aud | | | Set actor from
-   | | | sub in actor
-   | | | claim
-   | | | |
-   | | Txn-Token | |
-   | |<---------------------------|
-   | | | |
+   ``` Agent App External Authorization Txn-Token Endpoint Server
+   Service | | | | | Self- | | | | triggered | | | |
+   event | | | |--+ | | | | | | | | |<-+ | | | | | | | | Call external
+   API | | |---------->| | | | | | | | OAuth
+   Challenge | | |<----------| | | | | | | | Client Credentials
+   Grant | | |------------------------->| | | | | | | Access Token
+   (AT1) | | | sub, aud
+   claims | | |<-------------------------| | | | | | | Call with
+   AT1 | | |---------->| | | | | | | | | Request Txn-Token | | | with
+   AT1 as param | | |--------------------------->| | | | | | | |
+   Validate AT1 | | | Extract claims | | | Set sub from aud | | | Set
+   actor from | | | sub in actor | | | claim | | | | | | Txn-
+   Token | | | |<---------------------------| | | | |
 
    Legend: ----> : Request flow <---- : Response flow | : Component
    boundary + : Internal process --+ : Self-triggered event
