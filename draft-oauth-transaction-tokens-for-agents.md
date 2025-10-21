@@ -210,6 +210,7 @@ Txn-Token Service.
 
 Based on the updated flow, here's a more detailed RFC-style flow diagram:
 
+<pre><code>
 ```
 Principal    Agent App    External    Authorization   Txn-Token
                          Endpoint        Server        Service
@@ -262,6 +263,8 @@ Legend:
   |   : Component boundary
 ```
 
+</code></pre>
+
 Notes:
 1. AT1 refers to the access token obtained by Agent App
 2. The External Endpoint uses its own access token to call Txn-Token Service
@@ -272,6 +275,7 @@ Notes:
 
 ### Autonomous Flow
 
+<pre><code>
 ```
 Agent App    External    Authorization   Txn-Token
             Endpoint        Server        Service
@@ -328,6 +332,7 @@ Notes:
 * Self-triggered events can be scheduled tasks or external triggers
 * Token validation includes signature and claims verification
 ```
+</code></pre>
 
 ## Replacement tokens
 Txn-Token Service provides capability to get a replacement Txn-Token as defined in the [OAUTH-TXN-TOKENS.replacement flow](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to). If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub' and 'aud' claims.
