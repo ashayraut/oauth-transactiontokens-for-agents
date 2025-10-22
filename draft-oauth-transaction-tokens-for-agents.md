@@ -73,7 +73,11 @@ thereby enhancing security.
    services within the call chain to implement fine-grained access
    control policies for agent-based workflows. Specifically, it does
    not provide adequate information about the AI agent's identity or
-   its initiating entity, limiting transaction traceability.
+   its initiating entity, limiting transaction traceability. With this
+   extension, Transaction Tokens will carry agent identity information
+   which will help in better traceability for AI Agent's actions
+   deep down the web service graph connecting multiple web services
+   involved in completing a transaction in distributed systems.
 
    This document defines two new contexts within the Transaction Token
    to address these limitations:
