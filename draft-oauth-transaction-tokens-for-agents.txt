@@ -4,8 +4,8 @@
 
 Network Working Group                                            A. RAUT
 Internet-Draft                                                    Amazon
-Intended status: Informational                           21 October 2025
-Expires: 24 April 2026
+Intended status: Informational                           22 October 2025
+Expires: 25 April 2026
 
 
                      Transaction Tokens For Agents
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 April 2026.
+   This Internet-Draft will expire on 25 April 2026.
 
 Copyright Notice
 
@@ -114,7 +114,11 @@ Table of Contents
    implement fine-grained access control policies for agent-based
    workflows.  Specifically, it does not provide adequate information
    about the AI agent's identity or its initiating entity, limiting
-   transaction traceability.
+   transaction traceability.  With this extension, Transaction Tokens
+   will carry agent identity information which will help in better
+   traceability for AI Agent's actions deep down the web service graph
+   connecting multiple web services involved in completing a transaction
+   in distributed systems.
 
    This document defines two new contexts within the Transaction Token
    to address these limitations:
