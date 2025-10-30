@@ -333,7 +333,6 @@ Notes:
 * Self-triggered events can be scheduled tasks or external triggers
 * Token validation includes signature and claims verification
 ~~~
-</code></pre>
 
 ## Replacement tokens
 Txn-Token Service provides capability to get a replacement Txn-Token as defined in the [OAUTH-TXN-TOKENS.replacement flow](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to). If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub' and 'aud' claims.
