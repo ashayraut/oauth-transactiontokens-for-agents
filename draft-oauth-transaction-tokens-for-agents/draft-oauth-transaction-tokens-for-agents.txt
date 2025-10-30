@@ -4,8 +4,8 @@
 
 Network Working Group                                            A. RAUT
 Internet-Draft                                                    Amazon
-Intended status: Informational                           29 October 2025
-Expires: 2 May 2026
+Intended status: Informational                           30 October 2025
+Expires: 3 May 2026
 
 
                      Transaction Tokens For Agents
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 May 2026.
+   This Internet-Draft will expire on 3 May 2026.
 
 Copyright Notice
 
@@ -381,8 +381,6 @@ Table of Contents
    * AT1 is included as parameter in Txn-Token request
    * Self-triggered events can be scheduled tasks or external triggers
    * Token validation includes signature and claims verification
-
-   </code></pre>
 
 3.4.  Replacement tokens
 
