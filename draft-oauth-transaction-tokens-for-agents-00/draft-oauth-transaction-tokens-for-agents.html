@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Transaction Tokens For Agents</title>
+<meta content="ASHAY RAUT" name="author">
+<meta content="
+       This document specifies an extension to the OAuth Transaction Tokens
+framework (https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
+to support agent context propagation within Transaction
+Tokens for agent-based workloads. The extension defines two new
+context fields: 'actor' and 'principal'. The 'actor' field identifies
+the agent performing the action, while the 'principal' field identifies
+the human or system entity that initiated the agent's action. For
+autonomous agents operating independently, the 'principal' field MAY
+be omitted. These additional context fields enable services within
+the call graph to make more granular access control decisions,
+thereby enhancing security. 
+    " name="description">
+<meta content="xml2rfc 3.31.0" name="generator">
+<meta content="next generation" name="keyword">
+<meta content="unicorn" name="keyword">
+<meta content="sparkling distributed ledger" name="keyword">
+<meta content="draft-oauth-transaction-tokens-for-agents-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.31.0
+    Python 3.12.12
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.6
+    lxml 5.3.1
+    platformdirs 4.5.0
+    pycountry 24.6.1
+    PyYAML 6.0.2
+    requests 2.32.5
+    wcwidth 0.2.14
+-->
+<link href="draft-oauth-transaction-tokens-for-agents.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Transaction Tokens For Agents</td>
+<td class="right">October 2025</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">RAUT</td>
+<td class="center">Expires 3 May 2026</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Network Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-oauth-transaction-tokens-for-agents-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2025-10-30" class="published">30 October 2025</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2026-05-03">3 May 2026</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">A. RAUT</div>
+<div class="org">Amazon</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Transaction Tokens For Agents</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document specifies an extension to the OAuth Transaction Tokens
+framework (https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
+to support agent context propagation within Transaction
+Tokens for agent-based workloads. The extension defines two new
+context fields: 'actor' and 'principal'. The 'actor' field identifies
+the agent performing the action, while the 'principal' field identifies
+the human or system entity that initiated the agent's action. For
+autonomous agents operating independently, the 'principal' field MAY
+be omitted. These additional context fields enable services within
+the call graph to make more granular access control decisions,
+thereby enhancing security.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://ashayraut.github.io/oauth-transactiontokens-for-agents/draft-oauth-transaction-tokens-for-agents.html">https://ashayraut.github.io/oauth-transactiontokens-for-agents/draft-oauth-transaction-tokens-for-agents.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-oauth-transaction-tokens-for-agents/">https://datatracker.ietf.org/doc/draft-oauth-transaction-tokens-for-agents/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/ashayraut/oauth-transactiontokens-for-agents">https://github.com/ashayraut/oauth-transactiontokens-for-agents</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 3 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2025 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-protocol-overview" class="internal xref">Protocol overview</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-transaction-flow" class="internal xref">Transaction Flow</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-agent-application-transacti" class="internal xref">Agent Application Transaction Flows</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="auto internal xref">3.2.1</a>.  <a href="#name-principal-initiated-flow" class="internal xref">Principal-Initiated Flow</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.2">
+                    <p id="section-toc.1-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="auto internal xref">3.2.2</a>.  <a href="#name-autonomous-flow" class="internal xref">Autonomous Flow</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-flow-diagrams" class="internal xref">Flow Diagrams</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.1">
+                    <p id="section-toc.1-1.3.2.3.2.1.1"><a href="#section-3.3.1" class="auto internal xref">3.3.1</a>.  <a href="#name-principal-initiated-flow-2" class="internal xref">Principal-Initiated Flow</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.2">
+                    <p id="section-toc.1-1.3.2.3.2.2.1"><a href="#section-3.3.2" class="auto internal xref">3.3.2</a>.  <a href="#name-autonomous-flow-2" class="internal xref">Autonomous Flow</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-replacement-tokens" class="internal xref">Replacement tokens</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5">
+                <p id="section-toc.1-1.3.2.5.1"><a href="#section-3.5" class="auto internal xref">3.5</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.6">
+                <p id="section-toc.1-1.3.2.6.1"><a href="#section-3.6" class="auto internal xref">3.6</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.6.2.1">
+                    <p id="section-toc.1-1.3.2.6.2.1.1"><a href="#section-3.6.1" class="auto internal xref">3.6.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-contributors" class="internal xref">Contributors</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Traditional zero trust authorization systems face new challenges when
+   applied to AI agent workloads. Unlike conventional web services,
+   AI agents possess capabilities for autonomous operation, behavioral
+   adaptation, and dynamic integration with various data sources. These
+   characteristics may lead to decisions that extend beyond their
+   initial operational boundaries.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Existing zero trust models, which effectively manage permissions and
+   access scopes for traditional web services, require enhancement to
+   address the unique properties of AI agents. Authorization systems
+   must evaluate each AI agent interaction independently, considering
+   both the immediate context and intended action. This necessitates
+   more sophisticated approaches to policy enforcement, behavioral
+   monitoring, and audit tracking to maintain security governance.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">Transaction Tokens (Txn-Tokens) are short-lived, signed JSON Web
+   Tokens <a href="https://tools.ietf.org/html/rfc7519">RFC7519</a> that convey identity and authorization context.
+   However, the current Txn-Token format lacks sufficient context for
+   services within the call chain to implement fine-grained access
+   control policies for agent-based workflows. Specifically, it does
+   not provide adequate information about the AI agent's identity or
+   its initiating entity, limiting transaction traceability. With this
+   extension, Transaction Tokens will carry agent identity information
+   which will help in better traceability for AI Agent's actions
+   deep down the web service graph connecting multiple web services
+   involved in completing a transaction in distributed systems.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This document defines two new contexts within the Transaction Token
+   to address these limitations:<a href="#section-1-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-5">
+<li id="section-1-5.1">
+          <p id="section-1-5.1.1">The actor context, which identifies the AI agent performing
+the action<a href="#section-1-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-1-5.2">
+          <p id="section-1-5.2.1">The principal context, which identifies the human or system
+entity on whose behalf the actor operates<a href="#section-1-5.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<p id="section-1-6">This extension leverages the existing Txn-Token infrastructure to
+   enable secure propagation of AI agent context throughout the
+   service graph.<a href="#section-1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="terminology">
+<section id="section-2">
+      <h2 id="name-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<p id="section-2-1">Agentic-AI: AI Agentic applications are software applications that utilize
+Large Language Models (LLM)s and plans, reasons,and takes actions independently
+to achieve complex, multi-step goals with minimal human oversight.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Workload:
+An independent computational unit that can autonomously receive and process
+invocations, and can generate invocations of other workloads.
+Examples of workloads include containerized microservices,
+monolithic services and infrastructure services such as managed databases.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">Trust Domain:
+A collection of systems, applications, or workloads that share a
+common security policy. In practice this may include a virtually or
+physically separated network, which contains two or more workloads.
+The workloads within a Trust Domain may be invoked only through published
+interfaces.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-4">Call Chain:
+A sequence of synchronous invocations that results from the invocation of an external endpoint.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-5">External Endpoint:
+A published interface to a Trust Domain that results in the invocation
+of a workload within the Trust Domain. This is the first service in the
+call chain where request starts.<a href="#section-2-5" class="pilcrow">¶</a></p>
+<p id="section-2-6">Transaction Token (Txn-Token):
+A signed JWT with a short lifetime, providing immutable information about the user or workload,
+certain parameters of the call, and specific contextual attributes of the call.
+The Txn-Token is used to authorize subsequent calls in the call chain.<a href="#section-2-6" class="pilcrow">¶</a></p>
+<p id="section-2-7">Transaction Token Service (Txn-Token Service):
+A special service within the Trust Domain that issues Txn-Tokens to requesting
+workloads. Each Trust Domain using Txn-Tokens MUST have exactly one logical
+Txn-Token Service.<a href="#section-2-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="protocol-overview">
+<section id="section-3">
+      <h2 id="name-protocol-overview">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-protocol-overview" class="section-name selfRef">Protocol overview</a>
+      </h2>
+<div id="transaction-flow">
+<section id="section-3.1">
+        <h3 id="name-transaction-flow">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-transaction-flow" class="section-name selfRef">Transaction Flow</a>
+        </h3>
+<p id="section-3.1-1">This section describes the process by which an agent application
+   obtains a Transaction Token, either acting autonomously or on behalf
+   of a principal. The external endpoint requests a Txn-Token following
+   the procedures defined in <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">OAUTH-TXN-TOKENS</a>, augmented with additional
+   context for agent identity and, when applicable, principal identity.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="agent-application-transaction-flows">
+<section id="section-3.2">
+        <h3 id="name-agent-application-transacti">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-agent-application-transacti" class="section-name selfRef">Agent Application Transaction Flows</a>
+        </h3>
+<p id="section-3.2-1">The Transaction Token creation process varies depending on the
+   presence of a principal.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<div id="principal-initiated-flow">
+<section id="section-3.2.1">
+          <h4 id="name-principal-initiated-flow">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-principal-initiated-flow" class="section-name selfRef">Principal-Initiated Flow</a>
+          </h4>
+<p id="section-3.2.1-1">When a principal initiates the workflow, the following steps occur:<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3.2.1-2">
+<li id="section-3.2.1-2.1">
+              <p id="section-3.2.1-2.1.1">The principal invokes the agent application to perform a task.<a href="#section-3.2.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.1-2.2">
+              <p id="section-3.2.1-2.2.1">The agent application calls an external endpoint. External endpoint throws back OAuth challenges.<a href="#section-3.2.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.1-2.3">
+              <p id="section-3.2.1-2.3.1">The agent application authenticates using an OAuth 2.0 Auth code flow <a href="https://tools.ietf.org/html/rfc6749">RFC6749</a>
+access token. The access token contains subject and clientId claims as per <a href="https://datatracker.ietf.org/doc/rfc9068">RFC9068</a>.<a href="#section-3.2.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.1-2.4">
+              <p id="section-3.2.1-2.4.1">The external endpoint submits the received access token to the
+Txn-Token Service. Note that this received access token is different rather the access token which
+external endpoint has available to call Txn-Token Service itself. So the received access token is actually a parameter required
+to call Txn-token Service<a href="#section-3.2.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.1-2.5">
+              <p id="section-3.2.1-2.5.1">The Txn-Token Service validates the access token.<a href="#section-3.2.1-2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.1-2.6">
+              <p id="section-3.2.1-2.6.1">As specified in <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">OAUTH-TXN-TOKENS</a>, the Txn-Token Service uses
+the access token's 'aud' claim to populate the Txn-Token's
+'sub' claim.<a href="#section-3.2.1-2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.1-2.7">
+              <p id="section-3.2.1-2.7.1">The Txn-Token Service copies the access token's 'actor' or 'clientId' claim
+to the Txn-Token's 'actor' context. Any nested structure within
+the 'actor' claim is preserved.<a href="#section-3.2.1-2.7.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.1-2.8">
+              <p id="section-3.2.1-2.8.1">The Txn-Token Service uses the access token's 'sub' claim to
+      populate the Txn-Token's 'principal' context.<a href="#section-3.2.1-2.8.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+</section>
+</div>
+<div id="autonomous-flow">
+<section id="section-3.2.2">
+          <h4 id="name-autonomous-flow">
+<a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-autonomous-flow" class="section-name selfRef">Autonomous Flow</a>
+          </h4>
+<p id="section-3.2.2-1">When the agent application operates autonomously, the following
+   steps occur:<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3.2.2-2">
+<li id="section-3.2.2-2.1">
+              <p id="section-3.2.2-2.1.1">The agent application initiates a task based on an event or
+scheduled assignment.<a href="#section-3.2.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.2-2.2">
+              <p id="section-3.2.2-2.2.1">The agent application calls an external endpoint. OAuth challenge flow starts.<a href="#section-3.2.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.2-2.3">
+              <p id="section-3.2.2-2.3.1">The agent application authenticates using an OAuth 2.0 <a href="https://tools.ietf.org/html/rfc6749">RFC6749</a>. When an autonomous agent
+(no human resource owner) needs to call another resource server using OAuth,
+it follows the Client Credentials Grant defined explicitly in <a href="https://tools.ietf.org/html/rfc6749">RFC6749</a>.<a href="#section-3.2.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.2-2.4">
+              <p id="section-3.2.2-2.4.1">The agent application uses the access token to call the external endpoint.<a href="#section-3.2.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.2-2.5">
+              <p id="section-3.2.2-2.5.1">The external endpoint submits the received access token to the
+Txn-Token Service. Note that this received access token is different rather the access token which
+external endpoint has available to call Txn-Token Service itself. So the received access token is actually a parameter required
+to call Txn-token Service<a href="#section-3.2.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.2-2.6">
+              <p id="section-3.2.2-2.6.1">The Txn-Token Service validates the access token and extracts
+the actor and subject identities.<a href="#section-3.2.2-2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.2-2.7">
+              <p id="section-3.2.2-2.7.1">As specified in <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">OAUTH-TXN-TOKENS</a>, the Txn-Token Service uses
+      the access token's 'aud' claim to populate the Txn-Token's
+      'sub' claim.<a href="#section-3.2.2-2.7.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-3.2.2-2.8">
+              <p id="section-3.2.2-2.8.1">The Txn-Token Service copies the 'sub' field from within the
+      access token's 'actor' claim to the Txn-Token's 'actor' context.
+      Any nested structure is preserved.<a href="#section-3.2.2-2.8.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+</section>
+</div>
+</section>
+</div>
+<div id="flow-diagrams">
+<section id="section-3.3">
+        <h3 id="name-flow-diagrams">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-flow-diagrams" class="section-name selfRef">Flow Diagrams</a>
+        </h3>
+<div id="principal-initiated-flow-1">
+<section id="section-3.3.1">
+          <h4 id="name-principal-initiated-flow-2">
+<a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-principal-initiated-flow-2" class="section-name selfRef">Principal-Initiated Flow</a>
+          </h4>
+<p id="section-3.3.1-1">Based on the updated flow, here's a more detailed RFC-style flow diagram:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-3.3.1-2">
+<pre>
+Principal    Agent App    External    Authorization   Txn-Token
+                         Endpoint        Server        Service
+   |            |           |              |             |
+   | Invoke     |           |              |             |
+   | agent task |           |              |             |
+   |-----------&gt;|           |              |             |
+   |            |           |              |             |
+   |            | Call external API        |             |
+   |            |----------&gt;|              |             |
+   |            |           |              |             |
+   |            |   OAuth Challenge        |             |
+   |            |&lt;----------|              |             |
+   |            |           |              |             |
+   |            | Initiate Auth Code Flow  |             |
+   |            |-------------------------&gt;|             |
+   |            |           |              |             |
+   |            | Auth Code                |             |
+   |            |&lt;-------------------------|             |
+   |            |           |              |             |
+   |            | Exchange code for token  |             |
+   |            |-------------------------&gt;|             |
+   |            |           |              |             |
+   |            | Access Token (AT1)       |             |
+   |            | sub, clientId claims     |             |
+   |            |&lt;-------------------------|             |
+   |            |           |              |             |
+   |            | Call with AT1            |             |
+   |            |----------&gt;|              |             |
+   |            |           |              |             |
+   |            |           | Request Txn-Token          |
+   |            |           | with AT1 as param          |
+   |            |           |---------------------------&gt;|
+   |            |           |              |             |
+   |            |           |              |    Validate AT1
+   |            |           |              |    Extract claims
+   |            |           |              |    Set sub from aud
+   |            |           |              |    Set actor from
+   |            |           |              |    clientId
+   |            |           |              |    Set principal
+   |            |           |              |    from sub
+   |            |           |              |             |
+   |            |           | Txn-Token    |             |
+   |            |           |&lt;---------------------------|
+   |            |           |              |             |
+
+Legend:
+----&gt; : Request flow
+&lt;---- : Response flow
+  |   : Component boundary
+</pre><a href="#section-3.3.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3.1-3">Notes:
+1. AT1 refers to the access token obtained by Agent App
+2. The External Endpoint uses its own access token to call Txn-Token Service
+3. AT1 is passed as a parameter in the Txn-Token request
+4. The flow shows detailed OAuth 2.0 Authorization Code flow steps
+5. Token validation and claim extraction steps are shown in the Txn-Token Service<a href="#section-3.3.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="autonomous-flow-1">
+<section id="section-3.3.2">
+          <h4 id="name-autonomous-flow-2">
+<a href="#section-3.3.2" class="section-number selfRef">3.3.2. </a><a href="#name-autonomous-flow-2" class="section-name selfRef">Autonomous Flow</a>
+          </h4>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-3.3.2-1">
+<pre>
+Agent App    External    Authorization   Txn-Token
+            Endpoint        Server        Service
+    |           |              |             |
+    | Self-     |              |             |
+    | triggered |              |             |
+    | event     |              |             |
+    |--+        |              |             |
+    |  |        |              |             |
+    |&lt;-+        |              |             |
+    |           |              |             |
+    | Call external API        |             |
+    |----------&gt;|              |             |
+    |           |              |             |
+    |   OAuth Challenge        |             |
+    |&lt;----------|              |             |
+    |           |              |             |
+    | Client Credentials Grant |             |
+    |-------------------------&gt;|             |
+    |           |              |             |
+    | Access Token (AT1)       |             |
+    |  sub, aud claims         |             |
+    |&lt;-------------------------|             |
+    |           |              |             |
+    | Call with AT1            |             |
+    |----------&gt;|              |             |
+    |           |              |             |
+    |           | Request Txn-Token          |
+    |           | with AT1 as param          |
+    |           |---------------------------&gt;|
+    |           |              |             |
+    |           |              |    Validate AT1
+    |           |              |    Extract claims
+    |           |              |    Set sub from aud
+    |           |              |    Set actor from
+    |           |              |    sub in actor
+    |           |              |    claim
+    |           |              |             |
+    |           | Txn-Token    |             |
+    |           |&lt;---------------------------|
+    |           |              |             |
+
+Legend:
+----&gt; : Request flow
+&lt;---- : Response flow
+  |   : Component boundary
+  +   : Internal process
+--+   : Self-triggered event
+
+Notes:
+* AT1: Access token obtained via Client Credentials Grant
+* External Endpoint uses its own credentials for Txn-Token Service
+* AT1 is included as parameter in Txn-Token request
+* Self-triggered events can be scheduled tasks or external triggers
+* Token validation includes signature and claims verification
+</pre><a href="#section-3.3.2-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="replacement-tokens">
+<section id="section-3.4">
+        <h3 id="name-replacement-tokens">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-replacement-tokens" class="section-name selfRef">Replacement tokens</a>
+        </h3>
+<p id="section-3.4-1">Txn-Token Service provides capability to get a replacement Txn-Token as defined in the <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to">OAUTH-TXN-TOKENS.replacement flow</a>. If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub' and 'aud' claims.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-3.5">
+        <h3 id="name-security-considerations">
+<a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+        </h3>
+<ol start="1" type="1" class="normal type-1" id="section-3.5-1">
+<li id="section-3.5-1.1">
+            <p id="section-3.5-1.1.1">All the security considerations mentioned in <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">OAUTH-TXN-TOKENS</a> apply.<a href="#section-3.5-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.5-1.2">
+            <p id="section-3.5-1.2.1">Token Replay Protection Implementations MUST enforce strict token lifetime validation. The short-lived nature of Transaction Tokens helps mitigate replay attacks, but implementations SHOULD also consider:
+2.1 Implementing token tracking mechanisms within trust domains
+2.2 Validating token usage context<a href="#section-3.5-1.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.5-1.3">
+            <p id="section-3.5-1.3.1">Actor Identity Security
+3.1. Implementations MUST validate actor claims in tokens
+3.2. The Txn-Token Service MUST verify the authenticity of actor context before token issuance
+3.3. During replacement flow, Txn-Token Service MUST not replace actor context in the incoming Txn-Token.<a href="#section-3.5-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.5-1.4">
+            <p id="section-3.5-1.4.1">Principal Context Protection
+4.1. Systems MUST prevent unauthorized modifications to principal context during token propagation. Txn-Token is cryptographically signed.
+4.3. During replacement flow, Txn-Token Service MUST not replace principal context in the incoming Txn-Token.<a href="#section-3.5-1.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.5-1.5">
+            <p id="section-3.5-1.5.1">Transaction Chain Integrity
+5.1. Implementations MUST maintain cryptographic integrity of the token chain
+5.2. Services MUST validate tokens at trust domain boundaries
+5.3. Systems MUST implement protection against token tampering during service-to-service communication<a href="#section-3.5-1.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.5-1.6">
+            <p id="section-3.5-1.6.1">AI Agent Specific Controls
+6.1. Implementations MUST enforce scope boundaries for AI agent operations
+6.2. Systems SHOULD implement behavioral monitoring for AI agent activities by logging actor, principal in logs.
+6.3. Systems MUST maintain audit trails of AI agent activities<a href="#section-3.5-1.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.5-1.7">
+            <p id="section-3.5-1.7.1">Token Transformation Security
+7.1. The Txn-Token Service MUST validate all claims during access token to Txn-Token conversion
+7.2. Implementations MUST verify signatures and formats of all tokens
+7.3. Systems MUST prevent unauthorized manipulation during token transformation<a href="#section-3.5-1.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.5-1.8">
+            <p id="section-3.5-1.8.1">Replacement Token Considerations
+8.1. Systems MUST verify the authenticity and validity of original tokens before replacement
+8.2. Systems MUST implement controls to prevent unauthorized replacement requests<a href="#section-3.5-1.8.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.5-1.9">
+            <p id="section-3.5-1.9.1">Infrastructure Security
+9.1. All component communications MUST use secure channels
+9.2. Implementations MUST enforce strong authentication of the Authorization Server
+9.3. Systems MUST implement regular rotation of cryptographic keys
+9.4. Trust domain boundaries MUST be clearly defined and enforced<a href="#section-3.5-1.9.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="references">
+<section id="section-3.6">
+        <h3 id="name-references">
+<a href="#section-3.6" class="section-number selfRef">3.6. </a><a href="#name-references" class="section-name selfRef">References</a>
+        </h3>
+<div id="normative-references">
+<section id="section-3.6.1">
+          <h4 id="name-normative-references">
+<a href="#section-3.6.1" class="section-number selfRef">3.6.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+          </h4>
+<p id="section-3.6.1-1"><a href="https://tools.ietf.org/html/rfc6749">RFC6749</a>
+    Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <a href="https://www.rfc-editor.org/rfc/rfc6749">https://www.rfc-editor.org/rfc/rfc6749</a>.<a href="#section-3.6.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.6.1-2"><a href="https://tools.ietf.org/html/rfc7519">RFC7519</a>
+    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <a href="https://www.rfc-editor.org/rfc/rfc7519">https://www.rfc-editor.org/rfc/rfc7519</a>.<a href="#section-3.6.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.6.1-3"><a href="https://tools.ietf.org/html/rfc7515">RFC7515</a>
+    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May 2015, <a href="https://www.rfc-editor.org/rfc/rfc7515">https://www.rfc-editor.org/rfc/rfc7515</a>.<a href="#section-3.6.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.6.1-4"><a href="https://tools.ietf.org/html/rfc8693">RFC8693</a>
+    Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J., and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693, DOI 10.17487/RFC8693, January 2020, <a href="https://www.rfc-editor.org/rfc/rfc8693">https://www.rfc-editor.org/rfc/rfc8693</a>.<a href="#section-3.6.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.6.1-5"><a href="https://tools.ietf.org/html/rfc9068">RFC9068</a>
+    Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October 2021, <a href="https://www.rfc-editor.org/rfc/rfc9068">https://www.rfc-editor.org/rfc/rfc9068</a>.<a href="#section-3.6.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.6.1-6"><a href="https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens">OAUTH-TXN-TOKENS</a>
+     Atul Tulshibagwale, George Fletcher, Pieter Kasselman, "OAuth Transaction Tokens", <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html</a><a href="#section-3.6.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-A">
+      <h2 id="name-acknowledgments">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-A-1">The authors would like to thank the contributors and the OAuth working group members who gave valuable input to this draft.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="contributors">
+<section id="appendix-B">
+      <h2 id="name-contributors">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-contributors" class="section-name selfRef">Contributors</a>
+      </h2>
+<p id="appendix-B-1">name: Atul Tulshibagwale
+org: SGNL
+email: atul@sgnl.ai<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">ASHAY RAUT</span></div>
+<div dir="auto" class="left"><span class="org">Amazon</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:asharaut@amazon.com" class="email">asharaut@amazon.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
