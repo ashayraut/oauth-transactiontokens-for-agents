@@ -19,6 +19,16 @@ jobs:
       with:
         make: update-files
         token: ${{ github.token }}
+
+    - name: "Rebuild Submission Documents"
+      # We need to explicitly run the build commands *after* the action resets the state.
+      # This assumes your draft name is 'draft-oauth-transaction-tokens-for-agents'
+      run: |
+        DRAFT_NAME="draft-oauth-transaction-tokens-for-agents"
         
+        # Build XML from MD and then generate the TXT and HTML
+        # This uses the template's tools that were just cloned into the 'lib' folder
+        make -f lib/setup.mk ${DRAFT_NAME}.xml ${DRAFT_NAME}.txt ${DRAFT_NAME}.html
+
     - name: "Push Update"
       run: git push
