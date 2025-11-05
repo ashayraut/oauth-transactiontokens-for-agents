@@ -20,22 +20,5 @@ jobs:
         make: update-files
         token: ${{ github.token }}
         
-    - name: "Commit and Push Update"
-      run: |
-        # 1. Configure the Git user (required for actions to push)
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        
-        # 2. Add all changes created by the i-d-template action
-        git add .
-        
-        # 3. Check if there are actual changes (to prevent a failed run on an empty commit)
-        if git diff --staged --quiet; then
-          echo "No files were updated by the template action. Skipping commit and push."
-        else
-          # 4. Commit the changes
-          git commit -m "🤖 Automatic file update (README, .gitignore, etc.)"
-          
-          # 5. Push the commit
-          git push
-        fi
+    - name: "Push Update"
+      run: git push
