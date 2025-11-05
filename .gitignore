@@ -18,7 +18,6 @@
 /versioned/
 Gemfile.lock
 archive.json
-draft-oauth-transaction-tokens-for-agents.xml
 package-lock.json
 report.xml
 !requirements.txt
