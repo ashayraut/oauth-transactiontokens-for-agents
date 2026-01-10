@@ -337,6 +337,36 @@ Notes:
 ## Replacement tokens
 Txn-Token Service provides capability to get a replacement Txn-Token as defined in the [OAUTH-TXN-TOKENS.replacement flow](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to). If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub' and 'aud' claims.
 
+## Txn-Token Format
+### JWT Header
+No changes to the JWT header from the base specification: `typ` MUST be `txntoken+jwt`, with a signing key identifier such as `kid`.
+
+### JWT Body Claims
+The Txn-Token body augments the base claim set with two new top-level claims for agent context: `actor` and `principal`. Existing claims like `txn`, `sub`, `aud`, `iss`, `iat`, `exp`, `purp`, `tctx`, and `req_wl` retain identical semantics, population rules, and immutability guarantees.
+
+```
+{
+  "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e",
+  "sub": "api-gw.trust-domain.example",
+  "aud": "https://trading.trust-domain.example/stocks",
+  "iss": "https://txn-svc.trust-domain.example",
+  "iat": 1697059200,
+  "exp": 1697059500,
+  "purp": "trade.stocks",
+  "tctx": {
+    "action": "BUY",
+    "ticker": "MSFT",
+    "quantity": "100"
+  },
+  "req_wl": "apigateway.trust-domain.example",
+  "actor": {
+    "agent_id": "agent-1234",
+    "version": "v2.1.0",
+    "deployment": "prod-us-east-1"
+  },
+  "principal": "user:alice@example.com"
+}
+```
 
 ## Security Considerations
 
