@@ -29,12 +29,12 @@ thereby enhancing security.
     Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
-    intervaltree 3.1.0
+    intervaltree 3.2.1
     Jinja2 3.1.6
-    lxml 5.3.1
-    platformdirs 4.5.0
+    lxml 6.0.2
+    platformdirs 4.5.1
     pycountry 24.6.1
-    PyYAML 6.0.2
+    PyYAML 6.0.3
     requests 2.32.5
     wcwidth 0.2.14
 -->
@@ -1055,11 +1055,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Transaction Tokens For Agents</td>
-<td class="right">November 2025</td>
+<td class="right">January 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">RAUT</td>
-<td class="center">Expires 9 May 2026</td>
+<td class="center">Expires 14 July 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1072,12 +1072,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-oauth-transaction-tokens-for-agents-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-11-05" class="published">5 November 2025</time>
+<time datetime="2026-01-10" class="published">10 January 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-05-09">9 May 2026</time></dd>
+<dd class="expires"><time datetime="2026-07-14">14 July 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1132,7 +1132,7 @@ thereby enhancing security.<a href="#section-abstract-1" class="pilcrow">¶</a><
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 9 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 14 July 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1141,7 +1141,7 @@ thereby enhancing security.<a href="#section-abstract-1" class="pilcrow">¶</a><
 <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
         </h2>
 <p id="section-boilerplate.2-1">
-            Copyright (c) 2025 IETF Trust and the persons identified as the
+            Copyright (c) 2026 IETF Trust and the persons identified as the
             document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.2-2">
             This document is subject to BCP 78 and the IETF Trust's Legal
@@ -1199,13 +1199,21 @@ thereby enhancing security.<a href="#section-abstract-1" class="pilcrow">¶</a><
                 <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-replacement-tokens" class="internal xref">Replacement tokens</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5">
-                <p id="section-toc.1-1.3.2.5.1"><a href="#section-3.5" class="auto internal xref">3.5</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+                <p id="section-toc.1-1.3.2.5.1"><a href="#section-3.5" class="auto internal xref">3.5</a>.  <a href="#name-txn-token-format" class="internal xref">Txn-Token Format</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5.2.1">
+                    <p id="section-toc.1-1.3.2.5.2.1.1"><a href="#section-3.5.1" class="auto internal xref">3.5.1</a>.  <a href="#name-jwt-body-claims" class="internal xref">JWT Body Claims</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.6">
-                <p id="section-toc.1-1.3.2.6.1"><a href="#section-3.6" class="auto internal xref">3.6</a>.  <a href="#name-references" class="internal xref">References</a></p>
+                <p id="section-toc.1-1.3.2.6.1"><a href="#section-3.6" class="auto internal xref">3.6</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.7">
+                <p id="section-toc.1-1.3.2.7.1"><a href="#section-3.7" class="auto internal xref">3.7</a>.  <a href="#name-references" class="internal xref">References</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.6.2.1">
-                    <p id="section-toc.1-1.3.2.6.2.1.1"><a href="#section-3.6.1" class="auto internal xref">3.6.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.7.2.1">
+                    <p id="section-toc.1-1.3.2.7.2.1.1"><a href="#section-3.7.1" class="auto internal xref">3.7.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
 </li>
                 </ul>
 </li>
@@ -1567,86 +1575,126 @@ Notes:
 <p id="section-3.4-1">Txn-Token Service provides capability to get a replacement Txn-Token as defined in the <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to">OAUTH-TXN-TOKENS.replacement flow</a>. If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub' and 'aud' claims.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="security-considerations">
+<div id="txn-token-format">
 <section id="section-3.5">
-        <h3 id="name-security-considerations">
-<a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+        <h3 id="name-txn-token-format">
+<a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-txn-token-format" class="section-name selfRef">Txn-Token Format</a>
         </h3>
-<ol start="1" type="1" class="normal type-1" id="section-3.5-1">
-<li id="section-3.5-1.1">
-            <p id="section-3.5-1.1.1">All the security considerations mentioned in <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">OAUTH-TXN-TOKENS</a> apply.<a href="#section-3.5-1.1.1" class="pilcrow">¶</a></p>
+<p id="section-3.5-1">### JWT Header
+No changes to the JWT header from the base specification: <code>typ</code> MUST be <code>txntoken+jwt</code>, with a signing key identifier such as <code>kid</code>.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
+<div id="jwt-body-claims">
+<section id="section-3.5.1">
+          <h4 id="name-jwt-body-claims">
+<a href="#section-3.5.1" class="section-number selfRef">3.5.1. </a><a href="#name-jwt-body-claims" class="section-name selfRef">JWT Body Claims</a>
+          </h4>
+<p id="section-3.5.1-1">The Txn-Token body augments the base claim set with two new top-level claims for agent context: <code>actor</code> and <code>principal</code>. Existing claims like <code>txn</code>, <code>sub</code>, <code>aud</code>, <code>iss</code>, <code>iat</code>, <code>exp</code>, <code>purp</code>, <code>tctx</code>, and <code>req_wl</code> retain identical semantics, population rules, and immutability guarantees.<a href="#section-3.5.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.1-2"><code>
+{
+  "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e",
+  "sub": "api-gw.trust-domain.example",
+  "aud": "https://trading.trust-domain.example/stocks",
+  "iss": "https://txn-svc.trust-domain.example",
+  "iat": 1697059200,
+  "exp": 1697059500,
+  "purp": "trade.stocks",
+  "tctx": {
+    "action": "BUY",
+    "ticker": "MSFT",
+    "quantity": "100"
+  },
+  "req_wl": "apigateway.trust-domain.example",
+  "actor": {
+    "agent_id": "agent-1234",
+    "version": "v2.1.0",
+    "deployment": "prod-us-east-1"
+  },
+  "principal": "user:alice@example.com"
+}
+</code><a href="#section-3.5.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-3.6">
+        <h3 id="name-security-considerations">
+<a href="#section-3.6" class="section-number selfRef">3.6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+        </h3>
+<ol start="1" type="1" class="normal type-1" id="section-3.6-1">
+<li id="section-3.6-1.1">
+            <p id="section-3.6-1.1.1">All the security considerations mentioned in <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">OAUTH-TXN-TOKENS</a> apply.<a href="#section-3.6-1.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-3.5-1.2">
-            <p id="section-3.5-1.2.1">Token Replay Protection Implementations MUST enforce strict token lifetime validation. The short-lived nature of Transaction Tokens helps mitigate replay attacks, but implementations SHOULD also consider:
+          <li id="section-3.6-1.2">
+            <p id="section-3.6-1.2.1">Token Replay Protection Implementations MUST enforce strict token lifetime validation. The short-lived nature of Transaction Tokens helps mitigate replay attacks, but implementations SHOULD also consider:
 2.1 Implementing token tracking mechanisms within trust domains
-2.2 Validating token usage context<a href="#section-3.5-1.2.1" class="pilcrow">¶</a></p>
+2.2 Validating token usage context<a href="#section-3.6-1.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-3.5-1.3">
-            <p id="section-3.5-1.3.1">Actor Identity Security
+          <li id="section-3.6-1.3">
+            <p id="section-3.6-1.3.1">Actor Identity Security
 3.1. Implementations MUST validate actor claims in tokens
 3.2. The Txn-Token Service MUST verify the authenticity of actor context before token issuance
-3.3. During replacement flow, Txn-Token Service MUST not replace actor context in the incoming Txn-Token.<a href="#section-3.5-1.3.1" class="pilcrow">¶</a></p>
+3.3. During replacement flow, Txn-Token Service MUST not replace actor context in the incoming Txn-Token.<a href="#section-3.6-1.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-3.5-1.4">
-            <p id="section-3.5-1.4.1">Principal Context Protection
+          <li id="section-3.6-1.4">
+            <p id="section-3.6-1.4.1">Principal Context Protection
 4.1. Systems MUST prevent unauthorized modifications to principal context during token propagation. Txn-Token is cryptographically signed.
-4.3. During replacement flow, Txn-Token Service MUST not replace principal context in the incoming Txn-Token.<a href="#section-3.5-1.4.1" class="pilcrow">¶</a></p>
+4.3. During replacement flow, Txn-Token Service MUST not replace principal context in the incoming Txn-Token.<a href="#section-3.6-1.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-3.5-1.5">
-            <p id="section-3.5-1.5.1">Transaction Chain Integrity
+          <li id="section-3.6-1.5">
+            <p id="section-3.6-1.5.1">Transaction Chain Integrity
 5.1. Implementations MUST maintain cryptographic integrity of the token chain
 5.2. Services MUST validate tokens at trust domain boundaries
-5.3. Systems MUST implement protection against token tampering during service-to-service communication<a href="#section-3.5-1.5.1" class="pilcrow">¶</a></p>
+5.3. Systems MUST implement protection against token tampering during service-to-service communication<a href="#section-3.6-1.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-3.5-1.6">
-            <p id="section-3.5-1.6.1">AI Agent Specific Controls
+          <li id="section-3.6-1.6">
+            <p id="section-3.6-1.6.1">AI Agent Specific Controls
 6.1. Implementations MUST enforce scope boundaries for AI agent operations
 6.2. Systems SHOULD implement behavioral monitoring for AI agent activities by logging actor, principal in logs.
-6.3. Systems MUST maintain audit trails of AI agent activities<a href="#section-3.5-1.6.1" class="pilcrow">¶</a></p>
+6.3. Systems MUST maintain audit trails of AI agent activities<a href="#section-3.6-1.6.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-3.5-1.7">
-            <p id="section-3.5-1.7.1">Token Transformation Security
+          <li id="section-3.6-1.7">
+            <p id="section-3.6-1.7.1">Token Transformation Security
 7.1. The Txn-Token Service MUST validate all claims during access token to Txn-Token conversion
 7.2. Implementations MUST verify signatures and formats of all tokens
-7.3. Systems MUST prevent unauthorized manipulation during token transformation<a href="#section-3.5-1.7.1" class="pilcrow">¶</a></p>
+7.3. Systems MUST prevent unauthorized manipulation during token transformation<a href="#section-3.6-1.7.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-3.5-1.8">
-            <p id="section-3.5-1.8.1">Replacement Token Considerations
+          <li id="section-3.6-1.8">
+            <p id="section-3.6-1.8.1">Replacement Token Considerations
 8.1. Systems MUST verify the authenticity and validity of original tokens before replacement
-8.2. Systems MUST implement controls to prevent unauthorized replacement requests<a href="#section-3.5-1.8.1" class="pilcrow">¶</a></p>
+8.2. Systems MUST implement controls to prevent unauthorized replacement requests<a href="#section-3.6-1.8.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-3.5-1.9">
-            <p id="section-3.5-1.9.1">Infrastructure Security
+          <li id="section-3.6-1.9">
+            <p id="section-3.6-1.9.1">Infrastructure Security
 9.1. All component communications MUST use secure channels
 9.2. Implementations MUST enforce strong authentication of the Authorization Server
 9.3. Systems MUST implement regular rotation of cryptographic keys
-9.4. Trust domain boundaries MUST be clearly defined and enforced<a href="#section-3.5-1.9.1" class="pilcrow">¶</a></p>
+9.4. Trust domain boundaries MUST be clearly defined and enforced<a href="#section-3.6-1.9.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
 </div>
 <div id="references">
-<section id="section-3.6">
+<section id="section-3.7">
         <h3 id="name-references">
-<a href="#section-3.6" class="section-number selfRef">3.6. </a><a href="#name-references" class="section-name selfRef">References</a>
+<a href="#section-3.7" class="section-number selfRef">3.7. </a><a href="#name-references" class="section-name selfRef">References</a>
         </h3>
 <div id="normative-references">
-<section id="section-3.6.1">
+<section id="section-3.7.1">
           <h4 id="name-normative-references">
-<a href="#section-3.6.1" class="section-number selfRef">3.6.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-3.7.1" class="section-number selfRef">3.7.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
           </h4>
-<p id="section-3.6.1-1"><a href="https://tools.ietf.org/html/rfc6749">RFC6749</a>
-    Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <a href="https://www.rfc-editor.org/rfc/rfc6749">https://www.rfc-editor.org/rfc/rfc6749</a>.<a href="#section-3.6.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.6.1-2"><a href="https://tools.ietf.org/html/rfc7519">RFC7519</a>
-    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <a href="https://www.rfc-editor.org/rfc/rfc7519">https://www.rfc-editor.org/rfc/rfc7519</a>.<a href="#section-3.6.1-2" class="pilcrow">¶</a></p>
-<p id="section-3.6.1-3"><a href="https://tools.ietf.org/html/rfc7515">RFC7515</a>
-    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May 2015, <a href="https://www.rfc-editor.org/rfc/rfc7515">https://www.rfc-editor.org/rfc/rfc7515</a>.<a href="#section-3.6.1-3" class="pilcrow">¶</a></p>
-<p id="section-3.6.1-4"><a href="https://tools.ietf.org/html/rfc8693">RFC8693</a>
-    Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J., and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693, DOI 10.17487/RFC8693, January 2020, <a href="https://www.rfc-editor.org/rfc/rfc8693">https://www.rfc-editor.org/rfc/rfc8693</a>.<a href="#section-3.6.1-4" class="pilcrow">¶</a></p>
-<p id="section-3.6.1-5"><a href="https://tools.ietf.org/html/rfc9068">RFC9068</a>
-    Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October 2021, <a href="https://www.rfc-editor.org/rfc/rfc9068">https://www.rfc-editor.org/rfc/rfc9068</a>.<a href="#section-3.6.1-5" class="pilcrow">¶</a></p>
-<p id="section-3.6.1-6"><a href="https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens">OAUTH-TXN-TOKENS</a>
-     Atul Tulshibagwale, George Fletcher, Pieter Kasselman, "OAuth Transaction Tokens", <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html</a><a href="#section-3.6.1-6" class="pilcrow">¶</a></p>
+<p id="section-3.7.1-1"><a href="https://tools.ietf.org/html/rfc6749">RFC6749</a>
+    Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <a href="https://www.rfc-editor.org/rfc/rfc6749">https://www.rfc-editor.org/rfc/rfc6749</a>.<a href="#section-3.7.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.7.1-2"><a href="https://tools.ietf.org/html/rfc7519">RFC7519</a>
+    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <a href="https://www.rfc-editor.org/rfc/rfc7519">https://www.rfc-editor.org/rfc/rfc7519</a>.<a href="#section-3.7.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.7.1-3"><a href="https://tools.ietf.org/html/rfc7515">RFC7515</a>
+    Jones, M., Bradley, J., and N. Sakimura, "JSON Web Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May 2015, <a href="https://www.rfc-editor.org/rfc/rfc7515">https://www.rfc-editor.org/rfc/rfc7515</a>.<a href="#section-3.7.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.7.1-4"><a href="https://tools.ietf.org/html/rfc8693">RFC8693</a>
+    Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J., and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693, DOI 10.17487/RFC8693, January 2020, <a href="https://www.rfc-editor.org/rfc/rfc8693">https://www.rfc-editor.org/rfc/rfc8693</a>.<a href="#section-3.7.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.7.1-5"><a href="https://tools.ietf.org/html/rfc9068">RFC9068</a>
+    Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October 2021, <a href="https://www.rfc-editor.org/rfc/rfc9068">https://www.rfc-editor.org/rfc/rfc9068</a>.<a href="#section-3.7.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.7.1-6"><a href="https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens">OAUTH-TXN-TOKENS</a>
+     Atul Tulshibagwale, George Fletcher, Pieter Kasselman, "OAuth Transaction Tokens", <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html</a><a href="#section-3.7.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>

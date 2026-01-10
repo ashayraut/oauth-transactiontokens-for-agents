@@ -4,8 +4,8 @@
 
 Network Working Group                                            A. RAUT
 Internet-Draft                                                    Amazon
-Intended status: Informational                           5 November 2025
-Expires: 9 May 2026
+Intended status: Informational                           10 January 2026
+Expires: 14 July 2026
 
 
                      Transaction Tokens For Agents
@@ -54,11 +54,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 May 2026.
+   This Internet-Draft will expire on 14 July 2026.
 
 Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
+   Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -83,9 +83,11 @@ Table of Contents
        3.3.1.  Principal-Initiated Flow
        3.3.2.  Autonomous Flow
      3.4.  Replacement tokens
-     3.5.  Security Considerations
-     3.6.  References
-       3.6.1.  Normative References
+     3.5.  Txn-Token Format
+       3.5.1.  JWT Body Claims
+     3.6.  Security Considerations
+     3.7.  References
+       3.7.1.  Normative References
    Appendix A.  Acknowledgments
    Appendix B.  Contributors
    Author's Address
@@ -393,7 +395,30 @@ Table of Contents
    'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub'
    and 'aud' claims.
 
-3.5.  Security Considerations
+3.5.  Txn-Token Format
+
+   ### JWT Header No changes to the JWT header from the base
+   specification: typ MUST be txntoken+jwt, with a signing key
+   identifier such as kid.
+
+3.5.1.  JWT Body Claims
+
+   The Txn-Token body augments the base claim set with two new top-level
+   claims for agent context: actor and principal.  Existing claims like
+   txn, sub, aud, iss, iat, exp, purp, tctx, and req_wl retain identical
+   semantics, population rules, and immutability guarantees.
+
+   { "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e", "sub": "api-
+   gw.trust-domain.example", "aud": "https://trading.trust-
+   domain.example/stocks", "iss": "https://txn-svc.trust-
+   domain.example", "iat": 1697059200, "exp": 1697059500, "purp":
+   "trade.stocks", "tctx": { "action": "BUY", "ticker": "MSFT",
+   "quantity": "100" }, "req_wl": "apigateway.trust-domain.example",
+   "actor": { "agent_id": "agent-1234", "version": "v2.1.0",
+   "deployment": "prod-us-east-1" }, "principal":
+   "user:alice@example.com" }
+
+3.6.  Security Considerations
 
    1.  All the security considerations mentioned in OAUTH-TXN-TOKENS
        (https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-
@@ -446,9 +471,9 @@ Table of Contents
        implement regular rotation of cryptographic keys 9.4.  Trust
        domain boundaries MUST be clearly defined and enforced
 
-3.6.  References
+3.7.  References
 
-3.6.1.  Normative References
+3.7.1.  Normative References
 
    RFC6749 (https://tools.ietf.org/html/rfc6749) Hardt, D., Ed., "The
    OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749,
