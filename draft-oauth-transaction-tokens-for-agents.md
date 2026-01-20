@@ -2,7 +2,7 @@
 title: "Transaction Tokens For Agents"
 category: info
 
-docname: draft-oauth-transaction-tokens-for-agents-01
+docname: draft-oauth-transaction-tokens-for-agents-03
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -90,7 +90,11 @@ thereby enhancing security.
 
    This extension leverages the existing Txn-Token infrastructure to
    enable secure propagation of AI agent context throughout the
-   service graph.
+   service graph. 
+
+   There is an opportunity here to add 'agentic context' in the Txn Token too.
+   The Txn-Token MAY contain an agentic_ctx claim. The value of this claim, if present, MUST be a JSON object. T
+   The agentic_ctx claim conveys attributes about the agent and its operational constraints that are relevant to authorization, auditing, and policy evaluation.
 
 # Terminology
 
@@ -335,16 +339,20 @@ Notes:
 ~~~
 
 ## Replacement tokens
+
 Txn-Token Service provides capability to get a replacement Txn-Token as defined in the [OAUTH-TXN-TOKENS.replacement flow](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to). If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub' and 'aud' claims.
 
 ## Txn-Token Format
+
 ### JWT Header
+
 No changes to the JWT header from the base specification: `typ` MUST be `txntoken+jwt`, with a signing key identifier such as `kid`.
 
 ### JWT Body Claims
+
 The Txn-Token body augments the base claim set with two new top-level claims for agent context: `actor` and `principal`. Existing claims like `txn`, `sub`, `aud`, `iss`, `iat`, `exp`, `purp`, `tctx`, and `req_wl` retain identical semantics, population rules, and immutability guarantees.
 
-``
+~~~ json
 {
   "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e",
   "sub": "api-gw.trust-domain.example",
@@ -366,9 +374,23 @@ The Txn-Token body augments the base claim set with two new top-level claims for
   },
   "principal": "user:alice@example.com"
 }
-``
+~~~
 
-## Security Considerations
+## Agentic Context
+
+The Txn-Token MAY contain an agentic_ctx claim. Txn-Tokens are increasingly used in environments where transactions are executed by or with the assistance of autonomous or semi-autonomous agents (for example, Large Language Model (LLM)–based agents, workflow orchestrators, and policy-driven automation components). In such deployments, relying exclusively on subject identity and generic transaction parameters is insufficient to make robust authorization decisions. Additional information about the agent that is interpreting and acting on the transaction is often required.
+
+~~~ json
+"agentic_ctx": {
+  "agent_type": "planner+tool-orchestrator", // A string describing the functional role of the agent (for example, “planner”, “tool-orchestrator”, “data-assistant”, “code-execution-agent”). The semantics and allowed values are deployment-specific.
+  "agent_version": "3.4.2", // A string indicating a version or configuration identifier for the agent. This value can be used to associate the transaction with a particular, reviewed agent policy or release
+  "intent": "enumerate and validate production search services before Q4 traffic spike", // A string describing the high-level purpose of the transaction from the agent’s perspective (for example, “trade.stocks”, “enumerate.search.services”, “generate.billing.report”). This value is intended to support coarse-grained, intent-aware authorization policies.
+  "allowed_actions": ["read"],
+  "environment_constraints": { "environment": "prod", "region": "us" },
+}
+~~~
+
+# Security Considerations
 
 1. All the security considerations mentioned in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) apply.
 
@@ -411,9 +433,9 @@ The Txn-Token body augments the base claim set with two new top-level claims for
    9.4. Trust domain boundaries MUST be clearly defined and enforced
 
 
-## References
+# References
 
-### Normative References
+## Normative References
 [RFC6749](https://tools.ietf.org/html/rfc6749)
     Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <https://www.rfc-editor.org/rfc/rfc6749>.
 
