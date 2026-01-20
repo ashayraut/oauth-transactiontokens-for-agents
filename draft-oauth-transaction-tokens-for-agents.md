@@ -2,7 +2,7 @@
 title: "Transaction Tokens For Agents"
 category: info
 
-docname: draft-oauth-transaction-tokens-for-agents-latest
+docname: draft-oauth-transaction-tokens-for-agents-01
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -344,7 +344,7 @@ No changes to the JWT header from the base specification: `typ` MUST be `txntoke
 ### JWT Body Claims
 The Txn-Token body augments the base claim set with two new top-level claims for agent context: `actor` and `principal`. Existing claims like `txn`, `sub`, `aud`, `iss`, `iat`, `exp`, `purp`, `tctx`, and `req_wl` retain identical semantics, population rules, and immutability guarantees.
 
-```
+``
 {
   "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e",
   "sub": "api-gw.trust-domain.example",
@@ -366,7 +366,7 @@ The Txn-Token body augments the base claim set with two new top-level claims for
   },
   "principal": "user:alice@example.com"
 }
-```
+``
 
 ## Security Considerations
 
@@ -379,11 +379,11 @@ The Txn-Token body augments the base claim set with two new top-level claims for
 4. Actor Identity Security
    3.1. Implementations MUST validate actor claims in tokens
    3.2. The Txn-Token Service MUST verify the authenticity of actor context before token issuance
-   3.3. During replacement flow, Txn-Token Service MUST not replace actor context in the incoming Txn-Token.
+   3.3. During replacement flow, Txn-Token Service MUST avoid replacing actor context in the incoming Txn-Token.
 
 4. Principal Context Protection
    4.1. Systems MUST prevent unauthorized modifications to principal context during token propagation. Txn-Token is cryptographically signed.
-   4.3. During replacement flow, Txn-Token Service MUST not replace principal context in the incoming Txn-Token.
+   4.3. During replacement flow, Txn-Token Service MUST avoid replacing principal context in the incoming Txn-Token.
 
 5. Transaction Chain Integrity
    5.1. Implementations MUST maintain cryptographic integrity of the token chain
