@@ -2,7 +2,7 @@
 title: "Transaction Tokens For Agents"
 category: info
 
-docname: draft-oauth-transaction-tokens-for-agents-03
+docname: draft-oauth-transaction-tokens-for-agents-04
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -160,23 +160,21 @@ Txn-Token Service.
    3. The agent application authenticates using an OAuth 2.0 Auth code flow [RFC6749](https://tools.ietf.org/html/rfc6749)
       access token. The access token contains subject and clientId claims as per [RFC9068](https://datatracker.ietf.org/doc/rfc9068).
 
-   5. The external endpoint submits the received access token to the
-      Txn-Token Service. Note that this received access token is different rather the access token which
-      external endpoint has available to call Txn-Token Service itself. So the received access token is actually a parameter required
-      to call Txn-token Service
+   4. The external endpoint submits the received access token along with its Subject token to the
+      Txn-Token Service. Subject token requirements are specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html).
+      
 
+   5. The Txn-Token Service validates the access token.
 
-   6. The Txn-Token Service validates the access token.
-
-   8. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
+   6. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
       the access token's 'aud' claim to populate the Txn-Token's
       'sub' claim.
 
-   9. The Txn-Token Service copies the access token's 'actor' or 'clientId' claim
+   7. The Txn-Token Service copies the access token's 'actor' or 'clientId' claim
       to the Txn-Token's 'actor' context. Any nested structure within
       the 'actor' claim is preserved.
 
-   10. The Txn-Token Service uses the access token's 'sub' claim to
+   8. The Txn-Token Service uses the access token's 'sub' claim to
       populate the Txn-Token's 'principal' context.
 
 ### Autonomous Flow
@@ -193,21 +191,19 @@ Txn-Token Service.
       (no human resource owner) needs to call another resource server using OAuth,
       it follows the Client Credentials Grant defined explicitly in [RFC6749](https://tools.ietf.org/html/rfc6749).
 
-   5. The agent application uses the access token to call the external endpoint.
+   4. The agent application uses the access token to call the external endpoint.
 
-   7. The external endpoint submits the received access token to the
-      Txn-Token Service. Note that this received access token is different rather the access token which
-      external endpoint has available to call Txn-Token Service itself. So the received access token is actually a parameter required
-      to call Txn-token Service
+   5. The external endpoint submits the received access token along with its Subject token to the
+      Txn-Token Service. Subject token requirements are specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html).
 
-   9. The Txn-Token Service validates the access token and extracts
+   6. The Txn-Token Service validates the access token and extracts
       the actor and subject identities.
 
-   10. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
+   7. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
       the access token's 'aud' claim to populate the Txn-Token's
       'sub' claim.
 
-   11. The Txn-Token Service copies the 'sub' field from within the
+   8. The Txn-Token Service copies the 'sub' field from within the
       access token's 'actor' claim to the Txn-Token's 'actor' context.
       Any nested structure is preserved.
 
