@@ -2,12 +2,12 @@
 title: "Transaction Tokens For Agents"
 category: info
 
-docname: draft-oauth-transaction-tokens-for-agents-04
+docname: draft-oauth-transaction-tokens-for-agents-05
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
-v: 3
+v: 4
 # area: AREA
 # workgroup: WG Working Group
 keyword:
@@ -95,6 +95,10 @@ thereby enhancing security.
    There is an opportunity here to add 'agentic context' in the Txn Token too.
    The Txn-Token MAY contain an agentic_ctx claim. The value of this claim, if present, MUST be a JSON object. T
    The agentic_ctx claim conveys attributes about the agent and its operational constraints that are relevant to authorization, auditing, and policy evaluation.
+
+## Conventions and Terminology
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC2119](https://datatracker.ietf.org/doc/html/rfc2119) [RFC8174](https://datatracker.ietf.org/doc/html/rfc8174) when, and only when, they appear in all capitals, as shown here.
 
 # Terminology
 
@@ -386,6 +390,23 @@ The Txn-Token MAY contain an agentic_ctx claim. Txn-Tokens are increasingly used
 }
 ~~~
 
+### Integration with OAuth Rich Authorization Requests
+
+When the Authorization Server supports Rich Authorization Requests (RAR) as defined in [RFC9396](https://datatracker.ietf.org/doc/html/rfc9396), the authorization details captured during the authorization flow can provide valuable context for downstream authorization decisions. The RAR mechanism enables clients to specify fine-grained authorization requirements that may be captured, reviewed, and potentially consented to by the resource owner during the authorization process.
+
+Authorization Servers implementing RAR MAY include relevant authorization details within the access token. When the Txn-Token Service processes such access tokens to issue Transaction Tokens, it MAY extract these authorization details and include them within the agentic_ctx claim. This approach enables services deeper in the call chain to leverage authorization details for fine-grained access control decisions, even when the Authorization Server itself does not enforce policies based on all captured details.
+
+This pattern offers several advantages:
+Deferred Policy Enforcement: Authorization details can be captured and validated at the Authorization Server without requiring immediate policy decisions on all details. Fine-grained authorization policies can be enforced closer to the resources being accessed.
+
+1. Context Enrichment: The authorization details provide additional context about the scope and nature of the authorized operation, enabling more informed authorization decisions throughout the service graph.
+
+2. Consent Propagation: When user consent is obtained for specific authorization details, this consent context can be propagated through the Transaction Token to services that need to honor those consent decisions.
+
+3. Reduced Complexity: This approach allows businesses to avoid the complexity of implementing all fine-grained authorization checks at the Authorization Server, instead distributing authorization decisions to services with domain-specific knowledge.
+
+For example, an Authorization Server might capture detailed authorization requirements using RAR, obtain necessary user consent, and include these details in the access token. The Txn-Token Service can then extract relevant authorization details and include them in the agentic_ctx claim. Services receiving Transaction Tokens with authorization details in the agentic_ctx can use this information to make context-aware authorization decisions that respect the original authorization scope, user consent, and intended purpose of the operation. Implementations SHOULD carefully consider which authorization details are relevant for downstream services and avoid including sensitive information that is not necessary for authorization decisions in the call chain.
+
 # Security Considerations
 
 1. All the security considerations mentioned in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) apply.
@@ -432,6 +453,12 @@ The Txn-Token MAY contain an agentic_ctx claim. Txn-Tokens are increasingly used
 # References
 
 ## Normative References
+[RFC2119](https://datatracker.ietf.org/doc/html/rfc2119)
+    Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP 14, RFC 2119, DOI 10.17487/RFC2119, March 1997, <https://www.rfc-editor.org/rfc/rfc2119>.
+
+[RFC8174](https://datatracker.ietf.org/doc/html/rfc8174)
+     Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174, May 2017, https://www.rfc-editor.org/rfc/rfc8174
+    
 [RFC6749](https://tools.ietf.org/html/rfc6749)
     Hardt, D., Ed., "The OAuth 2.0 Authorization Framework", RFC 6749, DOI 10.17487/RFC6749, October 2012, <https://www.rfc-editor.org/rfc/rfc6749>.
 
@@ -446,6 +473,9 @@ The Txn-Token MAY contain an agentic_ctx claim. Txn-Tokens are increasingly used
 
 [RFC9068](https://tools.ietf.org/html/rfc9068)
     Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October 2021, <https://www.rfc-editor.org/rfc/rfc9068>.
+
+[RFC9396](https://datatracker.ietf.org/doc/html/rfc9396)
+    T. Lodderstedt, J. Richer, B. Campbell, "OAuth 2.0 Rich Authorization Requests", RFC 9396, DOI 10.17487/RFC9396, May 2023, <https://www.rfc-editor.org/rfc/rfc9396>.  
 
 [OAUTH-TXN-TOKENS](https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens)
      Atul Tulshibagwale, George Fletcher, Pieter Kasselman, "OAuth Transaction Tokens", <https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html>
