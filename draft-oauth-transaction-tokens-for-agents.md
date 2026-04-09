@@ -2,12 +2,12 @@
 title: "Transaction Tokens For Agents"
 category: info
 
-docname: draft-oauth-transaction-tokens-for-agents-05
+docname: draft-oauth-transaction-tokens-for-agents-06
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
-v: 4
+v: 5
 # area: AREA
 # workgroup: WG Working Group
 keyword:
@@ -36,17 +36,7 @@ informative:
 
 --- abstract
 
-This document specifies an extension to the OAuth Transaction Tokens
-framework (https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
-to support agent context propagation within Transaction
-Tokens for agent-based workloads. The extension defines two new
-context fields: 'actor' and 'principal'. The 'actor' field identifies
-the agent performing the action, while the 'principal' field identifies
-the human or system entity that initiated the agent's action. For
-autonomous agents operating independently, the 'principal' field MAY
-be omitted. These additional context fields enable services within
-the call graph to make more granular access control decisions,
-thereby enhancing security.
+This document specifies an extension to the [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) to support agent context propagation within Transaction Tokens for agent-based workloads. The extension defines the use of the 'act' field to identify the agent performing the action, and leverages the existing 'sub' field (as defined in the base Transaction Tokens specification) to represent the principal. The 'sub' field is populated according to the rules specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), based on the 'subject_token' provided in the token request. For autonomous agents operating independently, the 'sub' field represents the agent itself. These mechanisms enable services within the call graph to make more granular access control decisions, thereby enhancing security. 
 
 --- middle
 
@@ -79,22 +69,18 @@ thereby enhancing security.
    deep down the web service graph connecting multiple web services
    involved in completing a transaction in distributed systems.
 
-   This document defines two new contexts within the Transaction Token
+   This document defines three new contexts within the Transaction Token
    to address these limitations:
 
-   1. The actor context, which identifies the AI agent performing
-      the action
+   1. The act claim, which identifies the AI agent performing the action, aligning with OAuth 2.0 Token Exchange [RFC8693](https://tools.ietf.org/html/rfc8693) terminology for actor tokens 
 
-   2. The principal context, which identifies the human or system
-      entity on whose behalf the actor operates
+   2. The sub claim, as defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), which represents the principal on whose behalf the transaction is being performed. The population of this field follows the rules specified in the base Transaction Tokens specification, based on the 'subject_token' provided in the token request.
 
+   3. An optional agentic_ctx claim. The value of this claim, if present, MUST be a JSON object. The agentic_ctx claim conveys attributes about the agent and its operational constraints that are relevant to authorization, auditing, and policy evaluation.
+   
    This extension leverages the existing Txn-Token infrastructure to
    enable secure propagation of AI agent context throughout the
    service graph. 
-
-   There is an opportunity here to add 'agentic context' in the Txn Token too.
-   The Txn-Token MAY contain an agentic_ctx claim. The value of this claim, if present, MUST be a JSON object. T
-   The agentic_ctx claim conveys attributes about the agent and its operational constraints that are relevant to authorization, auditing, and policy evaluation.
 
 ## Conventions and Terminology
 
@@ -170,16 +156,11 @@ Txn-Token Service.
 
    5. The Txn-Token Service validates the access token.
 
-   6. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
-      the access token's 'aud' claim to populate the Txn-Token's
-      'sub' claim.
+   6. The Txn-Token Service populates the Txn-Token's 'sub' claim following the rules specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html). The 'sub' claim is determined based on the subject_token provided in the request, according to the conditions and rules defined in the base Transaction Tokens specification. This ensures that the principal is properly represented in the Txn-Token. 
 
-   7. The Txn-Token Service copies the access token's 'actor' or 'clientId' claim
-      to the Txn-Token's 'actor' context. Any nested structure within
-      the 'actor' claim is preserved.
+   7. The Txn-Token Service copies the access token's 'clientId' claim to the Txn-Token's 'act' field. Any nested structure within the 'clientId' claim is preserved. If the access token contains an 'act' claim, that value MAY be used instead of 'clientId'. 
 
-   8. The Txn-Token Service uses the access token's 'sub' claim to
-      populate the Txn-Token's 'principal' context.
+   8. The Txn-Token Service issues the Txn-Token to the requesting workload. 
 
 ### Autonomous Flow
 
@@ -200,16 +181,11 @@ Txn-Token Service.
    5. The external endpoint submits the received access token along with its Subject token to the
       Txn-Token Service. Subject token requirements are specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html).
 
-   6. The Txn-Token Service validates the access token and extracts
-      the actor and subject identities.
+   6. The Txn-Token Service validates the access token.
 
-   7. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
-      the access token's 'aud' claim to populate the Txn-Token's
-      'sub' claim.
+   7. The Txn-Token Service populates the Txn-Token's 'sub' claim following the rules specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html). The 'sub' claim is determined based on the subject_token provided in the request. For autonomous agents, this typically represents the agent's own identity. 
 
-   8. The Txn-Token Service copies the 'sub' field from within the
-      access token's 'actor' claim to the Txn-Token's 'actor' context.
-      Any nested structure is preserved.
+   8. The Txn-Token Service copies the access token's 'sub' or 'clientId' claim to the Txn-Token's 'act' field. Any nested structure is preserved. The 'act' field identifies the agent performing the autonomous action. 
 
 
 ## Flow Diagrams
