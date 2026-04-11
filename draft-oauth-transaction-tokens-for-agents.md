@@ -370,20 +370,42 @@ The Txn-Token MAY contain an `agentic_ctx` claim. Txn-Tokens are increasingly us
 
 ## Integration with OAuth Rich Authorization Requests
 
-When the Authorization Server supports Rich Authorization Requests (RAR) as defined in [RFC9396](https://datatracker.ietf.org/doc/html/rfc9396), the authorization details captured during the authorization flow can provide valuable context for downstream authorization decisions. The RAR mechanism enables clients to specify fine-grained authorization requirements that may be captured, reviewed, and potentially consented to by the resource owner during the authorization process.
+When the Authorization Server (AS) supports Rich Authorization Requests (RAR) as defined in [RFC9396], the authorization details captured during the initial consent flow provide high-fidelity context for downstream agentic enforcement. The RAR mechanism allows a Resource Owner to grant permissions for specific, fine-grained actions (e.g., "Allow Agent to search only 'Research' folder") which are then encoded in the Access Token.
 
-Authorization Servers implementing RAR MAY include relevant authorization details within the access token. When the Txn-Token Service processes such access tokens to issue Transaction Tokens, it MAY extract these authorization details and include them within the `agentic_ctx` claim. This approach enables services deeper in the call chain to leverage authorization details for fine-grained access control decisions, even when the Authorization Server itself does not enforce policies based on all captured details.
+### Processing RAR Context
 
-This pattern offers several advantages:
-Deferred Policy Enforcement: Authorization details can be captured and validated at the Authorization Server without requiring immediate policy decisions on all details. Fine-grained authorization policies can be enforced closer to the resources being accessed.
+The Txn-Token Service (TTS) SHOULD extract relevant authorization details from the `authorization_details` claim of the `subject_token` and encapsulate them within the `agentic_ctx`. This ensures that the agent's execution environment remains bound by the specific constraints approved by the user.
 
-1. Context Enrichment: The authorization details provide additional context about the scope and nature of the authorized operation, enabling more informed authorization decisions throughout the service graph.
+### Data Mapping and Enrichment
 
-2. Consent Propagation: When user consent is obtained for specific authorization details, this consent context can be propagated through the Transaction Token to services that need to honor those consent decisions.
+1. **Extraction**: The TTS extracts the RAR array from the incoming Access Token.
+2. **Encapsulation**: The TTS SHOULD include these details in the `agentic_ctx` under a standardized key to allow downstream services to distinguish between general agent metadata and explicit user-granted permissions.
+3. **Policy Deferral**: This pattern allows the AS to capture intent without necessarily needing the domain-specific logic to enforce it; enforcement is deferred to the microservices deep in the call chain that receive the Txn-Token.
 
-3. Reduced Complexity: This approach allows businesses to avoid the complexity of implementing all fine-grained authorization checks at the Authorization Server, instead distributing authorization decisions to services with domain-specific knowledge.
+### Benefits of RAR Integration
 
-For example, an Authorization Server might capture detailed authorization requirements using RAR, obtain necessary user consent, and include these details in the access token. The Txn-Token Service can then extract relevant authorization details and include them in the `agentic_ctx` claim. Services receiving Transaction Tokens with authorization details in the `agentic_ctx` can use this information to make context-aware authorization decisions that respect the original authorization scope, user consent, and intended purpose of the operation. Implementations SHOULD carefully consider which authorization details are relevant for downstream services and avoid including sensitive information that is not necessary for authorization decisions in the call chain.
+* **Consent Propagation**: User-consented details are cryptographically bound to the Txn-Token, ensuring consent is honored throughout the service graph.
+* **Granular Control**: Services can make informed decisions based on the specific "type" and "actions" authorized in the original RAR object.
+* **Reduced Complexity**: Centralizing complex consent capture at the AS while distributing enforcement via the `agentic_ctx` reduces the architectural burden on individual workloads.
+
+### Example of `agentic_ctx` with additional context
+~~~ json
+"agentic_ctx": {
+    "agent_type": "tool-orchestrator",
+    "intent": "validate search services",
+    "authorization_details": [
+      {
+        "type": "search_service_access",
+        "actions": ["read", "list"],
+        "locations": ["https://api.search.example/v1"]
+      }
+    ],
+    "environment_constraints": {
+      "environment": "prod",
+      "region": "us"
+    }
+}
+~~~
 
 # Multi-agent flows
 In complex agentic workflows, a primary agent (the "Delegator") may delegate sub-tasks to one or more secondary agents ("Delegatees"). This document defines a mechanism to preserve the delegation lineage across these transitions. Note that preserving lineage is optional.
