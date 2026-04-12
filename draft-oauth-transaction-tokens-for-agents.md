@@ -389,6 +389,7 @@ The Txn-Token Service (TTS) SHOULD extract relevant authorization details from t
 * **Reduced Complexity**: Centralizing complex consent capture at the AS while distributing enforcement via the `agentic_ctx` reduces the architectural burden on individual workloads.
 
 ### Example of `agentic_ctx` with additional context
+
 ~~~ json
 "agentic_ctx": {
     "agent_type": "tool-orchestrator",
@@ -433,6 +434,7 @@ If no `actchain` existed in the subject_token, a new array is created containing
 
 ### Multi-agent example JWT body claims
 This example represents a delegated state: a human principal initiated a task via a Researcher Agent, which then delegated a specific action to a Search Agent.
+
 ~~~ json
 {
   "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e",
