@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-12T02:41:44.366821+00:00",
+  "timestamp": "2026-04-14T02:39:40.839932+00:00",
   "repo": "ashayraut/oauth-transactiontokens-for-agents",
   "labels": [
     {
@@ -49,7 +49,88 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 4,
+      "id": "I_kwDOP8bteM79Iypn",
+      "title": "Use of delegation_chain term language uses delegating tasks as the core concept",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/4",
+      "state": "OPEN",
+      "author": "saisrungaram-ai",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "**Simple scenario**:\nA bank manager asks an AI assistant to approve a loan. The AI asks a credit-check tool to verify the applicant credit risk analysis and similarly delegates one more task to another agent to get the credit score for verification. The spawned credit-agent needs to know: did a real bank manager ultimately authorize this, or did some random agent trigger it on its own to spawn another agent to fetch credit score.?\n\nWhen Agent A delegates a task to Agent B, that delegation is an act of authority transfer \u2014 not just a function call. actchain describes who is calling. delegation_chain term describes who authorized whom to call whom.\n\n**Why delegation_chain, not actchain**\n1.  actchain also carries the same meaning, but somewhere not resonating with delegation as core concept.\n2. delegation_chain is a specific term describes who authorized whom to call whom.\n3. delegation_depth as a companion integer allows any service to enforce max-hop policies without traversing the nested chain.\n\n**Proposed claim**\n\"delegation_chain\": {\n  \"act\": {\n    \"sub\": \"credit-check-tool\",\n    \"act\": {\n      \"sub\": \"ai-assistant\",\n      \"act\": {\n        \"sub\": \"bank-manager@bank.com\"\n      }\n    }\n  }\n}\n\"delegation_depth\": 3\n\n",
+      "createdAt": "2026-04-12T06:56:58Z",
+      "updatedAt": "2026-04-12T06:56:58Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 5,
+      "id": "I_kwDOP8bteM79I4O9",
+      "title": "action_subject: The specific entity this transaction acts on",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/5",
+      "state": "OPEN",
+      "author": "saisrungaram-ai",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "**Problem Statement**\nA token says what action to perform but not on which specific entity \u2014 leaving every service to figure that out independently.\n\n**Simple scenario**\nA loan approval token says action: approveLoan. But there are 50 pending loans. Which one? The loan service has to look up whose loan this is, cross-reference the agent's session, and guess.\nMore importantly: for shared resources (a document multiple agents can access, a shared account), saying resource: approveloan doesnt justify. The token must say this specific loan, for this specific applicant.\n\n**Proposed claim name**: action_subject\n\"tctx\": {\n  \"action\": \"approveLoan\",\n  \"action_subject\": {\n    \"entity_type\": \"loan_application\",\n    \"entity_id\": \"loan-8821\",\n    \"entity_ref\": \"alex.turner@acme.com\"\n  }\n}\n\n**A2A examples:**\n\"entity_ref\": \"agent:financial-analyst-workload\"\n\"entity_ref\": \"workload:fraud-detection-service-v2\"\n\"entity_ref\": \"urn:dataset:fraud-training-v3\"\n\"entity_ref\": \"urn:device:sensor-prod-042\"\n\n**Taxonomy:**\nentity_type \u2014 what class of thing. \nentity_id \u2014 unique ID within that class. \nentity_ref \u2014 how to address or resolve it in the target system.",
+      "createdAt": "2026-04-12T07:06:24Z",
+      "updatedAt": "2026-04-12T07:06:24Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOP8bteM79I6nI",
+      "title": "trigger_type: What caused this action to happen",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/6",
+      "state": "OPEN",
+      "author": "saisrungaram-ai",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "**Problem Statement**\nThere is no claim to distinguish \"a human explicitly asked for this\" from \"an agent decided this on its own.\"\n\n**Proposed claim:**\n\n\"agentic_ctx\": {\n  \"trigger_type\": \"delegated\"\n}\n\n**Taxonomy for different scenarios**\nValues for trigger_type:\ndelegated \u2014 the principal in the chain explicitly requested this action\nautonomous \u2014 the acting agent decided this on its own\nscheduled \u2014 a time-based trigger\nevent \u2014 an external signal (webhook, queue message)\n\nToken is incomplete without it: Any policy that enforces \"agent must not autonomously trigger high-risk actions\" cannot be enforced from the token alone without this claim. Audit logs tell you what happened after the fact \u2014 trigger_type enables prevention at authorization time.\n\nBehavioral analysis note: trigger_type: autonomous on a sensitive action (like fund transfer) is a direct input to intent and behavior analysis in decision logs. Log it alongside the authorization decision.",
+      "createdAt": "2026-04-12T07:11:14Z",
+      "updatedAt": "2026-04-12T07:11:14Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 7,
+      "id": "I_kwDOP8bteM79I9Wf",
+      "title": "principal and type : Mandatory in every token, human or A2A",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/7",
+      "state": "OPEN",
+      "author": "saisrungaram-ai",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "**Why mandatory for both human and A2A:**\n\nHuman flow: principal.type = human\nA2A flow: principal.type = agent\nScheduled: principal.type = scheduled bot\n\n**Proposed claim**\n\n\"principal\": {\n  \"type\": \"user\" \n}\n\n**Taxonomy  values for type:**\ntype: user | agent | scheduled bot | event\n\nThe type alone changes the trust level and applicable policies. Without principal, a consuming service cannot distinguish a token that originated from a human supervisor versus one that originated from an unattended cron job \u2014 even if the delegation chain looks identical.\n\n**Token is incomplete without it**: \nAuthorization decisions that depend on the nature of the originating authority \u2014 which most enterprise policies do \u2014 cannot be made correctly without this.",
+      "createdAt": "2026-04-12T07:17:09Z",
+      "updatedAt": "2026-04-12T07:17:09Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 8,
+      "id": "I_kwDOP8bteM79I_Ww",
+      "title": "client : Mandatory in agentic_ctx",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/8",
+      "state": "OPEN",
+      "author": "saisrungaram-ai",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "**Problem Statement**\nThe same agent can be invoked through different interfaces \u2014 direct API, MCP tool, workflow engine \u2014 and each carries a different trust level, but the token looks identical.\n\n**Simple Scenario**\nYour AI assistant has access to your company's HR system.\n\n1. You open the assistant and ask it directly \u2192 you trust this call completely\n2. An MCP tool inside a third-party app invokes the same assistant \u2192 medium trust\n3. An unknown webhook triggers the assistant \u2192 low trust, needs scrutiny\n\nIn all three cases, the agent identity is the same. The agent_type is the same. But how it was invoked determines the appropriate authorization level. Without client, the HR system cannot distinguish these three scenarios.\n\n**Why mandatory, not optional:**\nMCP is now a standard interface for agentic systems. The same resource server will receive calls from direct agents, MCP tools, and workflow engines simultaneously. Policies that say \"MCP tool calls must be scoped to declared tool IDs\" or \"workflow engine calls require additional verification\" cannot be enforced without knowing the client type.\n\n**Proposed claim**\n\n\"agentic_ctx\": {\n  \"client\": {\n    \"type\": \"mcp_tool\",\n    \"id\": \"mcp::approve-loan-tool\"\n  }\n}\n\n**Taxonomy for different client types:**\n\ntype: agent | mcp_tool | workflow_engine | code_executor | api_gateway\n\n**Token is incomplete without it:** \nAs MCP adoption grows, resource servers need to differentiate trust levels by invocation interface \u2014 not just by agent identity.",
+      "createdAt": "2026-04-12T07:21:43Z",
+      "updatedAt": "2026-04-12T07:21:43Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": [
     {
       "number": 1,
