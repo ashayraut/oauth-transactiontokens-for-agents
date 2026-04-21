@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-14T02:39:40.839932+00:00",
+  "timestamp": "2026-04-21T02:41:15.436783+00:00",
   "repo": "ashayraut/oauth-transactiontokens-for-agents",
   "labels": [
     {
@@ -78,9 +78,17 @@
       "labels": [],
       "body": "**Problem Statement**\nA token says what action to perform but not on which specific entity \u2014 leaving every service to figure that out independently.\n\n**Simple scenario**\nA loan approval token says action: approveLoan. But there are 50 pending loans. Which one? The loan service has to look up whose loan this is, cross-reference the agent's session, and guess.\nMore importantly: for shared resources (a document multiple agents can access, a shared account), saying resource: approveloan doesnt justify. The token must say this specific loan, for this specific applicant.\n\n**Proposed claim name**: action_subject\n\"tctx\": {\n  \"action\": \"approveLoan\",\n  \"action_subject\": {\n    \"entity_type\": \"loan_application\",\n    \"entity_id\": \"loan-8821\",\n    \"entity_ref\": \"alex.turner@acme.com\"\n  }\n}\n\n**A2A examples:**\n\"entity_ref\": \"agent:financial-analyst-workload\"\n\"entity_ref\": \"workload:fraud-detection-service-v2\"\n\"entity_ref\": \"urn:dataset:fraud-training-v3\"\n\"entity_ref\": \"urn:device:sensor-prod-042\"\n\n**Taxonomy:**\nentity_type \u2014 what class of thing. \nentity_id \u2014 unique ID within that class. \nentity_ref \u2014 how to address or resolve it in the target system.",
       "createdAt": "2026-04-12T07:06:24Z",
-      "updatedAt": "2026-04-12T07:06:24Z",
+      "updatedAt": "2026-04-20T20:02:57Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ashayraut",
+          "authorAssociation": "OWNER",
+          "body": "As this proposal is inside tctx, this will go in https://github.com/oauth-wg/oauth-transaction-tokens/issues. ",
+          "createdAt": "2026-04-20T20:02:57Z",
+          "updatedAt": "2026-04-20T20:02:57Z"
+        }
+      ]
     },
     {
       "number": 6,
