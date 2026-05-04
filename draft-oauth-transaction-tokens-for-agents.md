@@ -2,12 +2,12 @@
 title: "Transaction Tokens For Agents"
 category: info
 
-docname: draft-oauth-transaction-tokens-for-agents-05
+docname: draft-oauth-transaction-tokens-for-agents-06
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
-v: 4
+v: 5
 # area: AREA
 # workgroup: WG Working Group
 keyword:
@@ -36,17 +36,7 @@ informative:
 
 --- abstract
 
-This document specifies an extension to the OAuth Transaction Tokens
-framework (https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
-to support agent context propagation within Transaction
-Tokens for agent-based workloads. The extension defines two new
-context fields: 'actor' and 'principal'. The 'actor' field identifies
-the agent performing the action, while the 'principal' field identifies
-the human or system entity that initiated the agent's action. For
-autonomous agents operating independently, the 'principal' field MAY
-be omitted. These additional context fields enable services within
-the call graph to make more granular access control decisions,
-thereby enhancing security.
+This document specifies an extension to the [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) to support agent context propagation within Transaction Tokens for agent-based workloads. The extension defines the use of the `act` field to identify the agent performing the action, and leverages the existing `sub` field (as defined in the base Transaction Tokens specification) to represent the principal. The `sub` field is populated according to the rules specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), based on the 'subject_token' provided in the token request. For autonomous agents operating independently, the `sub` field represents the agent itself. These mechanisms enable services within the call graph to make more granular access control decisions, thereby enhancing security. 
 
 --- middle
 
@@ -79,22 +69,18 @@ thereby enhancing security.
    deep down the web service graph connecting multiple web services
    involved in completing a transaction in distributed systems.
 
-   This document defines two new contexts within the Transaction Token
+   This document defines three new contexts within the Transaction Token
    to address these limitations:
 
-   1. The actor context, which identifies the AI agent performing
-      the action
+   1. The `act` claim, which identifies the AI agent performing the action, aligning with OAuth 2.0 Token Exchange [RFC8693](https://tools.ietf.org/html/rfc8693) terminology for actor tokens 
 
-   2. The principal context, which identifies the human or system
-      entity on whose behalf the actor operates
+   2. The `sub` claim, as defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), which represents the principal on whose behalf the transaction is being performed. The population of this field follows the rules specified in the base Transaction Tokens specification, based on the 'subject_token' provided in the token request.
 
+   3. An optional `agentic_ctx` claim. The value of this claim, if present, MUST be a JSON object. The `agentic_ctx` claim conveys attributes about the agent and its operational constraints that are relevant to authorization, auditing, and policy evaluation.
+   
    This extension leverages the existing Txn-Token infrastructure to
    enable secure propagation of AI agent context throughout the
    service graph. 
-
-   There is an opportunity here to add 'agentic context' in the Txn Token too.
-   The Txn-Token MAY contain an agentic_ctx claim. The value of this claim, if present, MUST be a JSON object. T
-   The agentic_ctx claim conveys attributes about the agent and its operational constraints that are relevant to authorization, auditing, and policy evaluation.
 
 ## Conventions and Terminology
 
@@ -170,16 +156,11 @@ Txn-Token Service.
 
    5. The Txn-Token Service validates the access token.
 
-   6. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
-      the access token's 'aud' claim to populate the Txn-Token's
-      'sub' claim.
+   6. The Txn-Token Service populates the Txn-Token's `sub` claim following the rules specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html). The `sub` claim is determined based on the subject_token provided in the request, according to the conditions and rules defined in the base Transaction Tokens specification. This ensures that the principal is properly represented in the Txn-Token. 
 
-   7. The Txn-Token Service copies the access token's 'actor' or 'clientId' claim
-      to the Txn-Token's 'actor' context. Any nested structure within
-      the 'actor' claim is preserved.
+   7. The Txn-Token Service copies the access token's `clientId` claim to the Txn-Token's `act` field. Any nested structure within the `clientId` claim is preserved. If the access token contains an `act` claim, that value MAY be used instead of `clientId`. 
 
-   8. The Txn-Token Service uses the access token's 'sub' claim to
-      populate the Txn-Token's 'principal' context.
+   8. The Txn-Token Service issues the Txn-Token to the requesting workload. 
 
 ### Autonomous Flow
 
@@ -200,16 +181,11 @@ Txn-Token Service.
    5. The external endpoint submits the received access token along with its Subject token to the
       Txn-Token Service. Subject token requirements are specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html).
 
-   6. The Txn-Token Service validates the access token and extracts
-      the actor and subject identities.
+   6. The Txn-Token Service validates the access token.
 
-   7. As specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), the Txn-Token Service uses
-      the access token's 'aud' claim to populate the Txn-Token's
-      'sub' claim.
+   7. The Txn-Token Service populates the Txn-Token's `sub` claim following the rules specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html). The `sub` claim is determined based on the subject_token provided in the request. For autonomous agents, this typically represents the agent's own identity. 
 
-   8. The Txn-Token Service copies the 'sub' field from within the
-      access token's 'actor' claim to the Txn-Token's 'actor' context.
-      Any nested structure is preserved.
+   8. The Txn-Token Service copies the access token's `sub` or `clientId` claim to the Txn-Token's `act` field. Any nested structure is preserved. The `act` field identifies the agent performing the autonomous action. 
 
 
 ## Flow Diagrams
@@ -242,23 +218,24 @@ Principal    Agent App    External    Authorization   Txn-Token
    |            |------------------------->|             |
    |            |           |              |             |
    |            | Access Token (AT1)       |             |
-   |            | sub, clientId claims     |             |
+   |            | w/ sub, clientId claims  |             |
    |            |<-------------------------|             |
    |            |           |              |             |
    |            | Call with AT1            |             |
    |            |---------->|              |             |
    |            |           |              |             |
    |            |           | Request Txn-Token          |
-   |            |           | with AT1 as param          |
+   |            |           | with AT1, Subject token    |
+   |            |           | as param     |             |
    |            |           |--------------------------->|
    |            |           |              |             |
    |            |           |              |    Validate AT1
    |            |           |              |    Extract claims
-   |            |           |              |    Set sub from aud
-   |            |           |              |    Set actor from
-   |            |           |              |    clientId
-   |            |           |              |    Set principal
-   |            |           |              |    from sub
+   |            |           |              |    Set sub from Subject token
+   |            |           |              |    Set act from AT1.clientId
+   |            |           |              |             |
+   |            |           |              |             |
+   |            |           |              |             |
    |            |           |              |             |
    |            |           | Txn-Token    |             |
    |            |           |<---------------------------|
@@ -309,15 +286,16 @@ Agent App    External    Authorization   Txn-Token
     |---------->|              |             |
     |           |              |             |
     |           | Request Txn-Token          |
-    |           | with AT1 as param          |
+    |           | with AT1, Subject token    |
+    |           | as param     |             |
     |           |--------------------------->|
     |           |              |             |
     |           |              |    Validate AT1
     |           |              |    Extract claims
     |           |              |    Set sub from aud
-    |           |              |    Set actor from
-    |           |              |    sub in actor
-    |           |              |    claim
+    |           |              |    Set act.sub from clientId or sub
+    |           |              |             |
+    |           |              |             |
     |           |              |             |
     |           | Txn-Token    |             |
     |           |<---------------------------|
@@ -332,7 +310,7 @@ Legend:
 
 Notes:
 * AT1: Access token obtained via Client Credentials Grant
-* External Endpoint uses its own credentials for Txn-Token Service
+* External Endpoint uses subject token for authenticating itself to Txn-Token Service
 * AT1 is included as parameter in Txn-Token request
 * Self-triggered events can be scheduled tasks or external triggers
 * Token validation includes signature and claims verification
@@ -340,7 +318,7 @@ Notes:
 
 ## Replacement tokens
 
-Txn-Token Service provides capability to get a replacement Txn-Token as defined in the [OAUTH-TXN-TOKENS.replacement flow](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to). If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', 'sub' and 'aud' claims.
+Txn-Token Service provides capability to get a replacement Txn-Token as defined in the [OAUTH-TXN-TOKENS.replacement flow](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html#name-creating-replacement-txn-to). If the original Txn-Token used to get replacement token contains 'actor' and 'principal' claims then in the replaced Txn-Token, the values of the 'actor' and 'principal' MUST remain unchanged similar to 'txn', `sub` and 'aud' claims.
 
 ## Txn-Token Format
 
@@ -350,12 +328,15 @@ No changes to the JWT header from the base specification: `typ` MUST be `txntoke
 
 ### JWT Body Claims
 
-The Txn-Token body augments the base claim set with two new top-level claims for agent context: `actor` and `principal`. Existing claims like `txn`, `sub`, `aud`, `iss`, `iat`, `exp`, `purp`, `tctx`, and `req_wl` retain identical semantics, population rules, and immutability guarantees.
+The Txn-Token body augments the base claim set with the `act` field for agent context. Existing claims like txn, sub, aud, iss, iat, exp, scope, tctx, and req_wl retain identical semantics, population rules, and immutability guarantees as defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html).
+
+In this example, the agent is 3rd party and not part of trust domain. It hits API Gateway in trust domain and API Gateway requests Txn-Token from Txn-token Service using
+access token received from 3P agent and its own subject token (to authenticate with Txn-Token Service). Requesting workload is API Gateway. Agent is agent-identity-1 (clientId in the access token issued to 3P agent to act on behalf of user:alice)
 
 ~~~ json
 {
   "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e",
-  "sub": "api-gw.trust-domain.example",
+  "sub": "user:alice@example.com", // if its human initiated
   "aud": "https://trading.trust-domain.example/stocks",
   "iss": "https://txn-svc.trust-domain.example",
   "iat": 1697059200,
@@ -366,19 +347,16 @@ The Txn-Token body augments the base claim set with two new top-level claims for
     "ticker": "MSFT",
     "quantity": "100"
   },
-  "req_wl": "apigateway.trust-domain.example",
-  "actor": {
-    "agent_id": "agent-1234",
-    "version": "v2.1.0",
-    "deployment": "prod-us-east-1"
-  },
-  "principal": "user:alice@example.com"
+  "req_wl": "apigateway.trust-domain.example", // API gateway requests Txn-token
+  "act": {
+     "sub":"agent-identity-1" // 3P agent hitting API gateway owned by trust domain
+  }
 }
 ~~~
 
-## Agentic Context
+#### Agentic Context
 
-The Txn-Token MAY contain an agentic_ctx claim. Txn-Tokens are increasingly used in environments where transactions are executed by or with the assistance of autonomous or semi-autonomous agents (for example, Large Language Model (LLM)–based agents, workflow orchestrators, and policy-driven automation components). In such deployments, relying exclusively on subject identity and generic transaction parameters is insufficient to make robust authorization decisions. Additional information about the agent that is interpreting and acting on the transaction is often required.
+The Txn-Token MAY contain an `agentic_ctx` claim. Txn-Tokens are increasingly used in environments where transactions are executed by or with the assistance of autonomous or semi-autonomous agents (for example, Large Language Model (LLM)–based agents, workflow orchestrators, and policy-driven automation components). In such deployments, relying exclusively on subject identity and generic transaction parameters is insufficient to make robust authorization decisions. Additional information about the agent that is interpreting and acting on the transaction is often required.
 
 ~~~ json
 "agentic_ctx": {
@@ -390,65 +368,153 @@ The Txn-Token MAY contain an agentic_ctx claim. Txn-Tokens are increasingly used
 }
 ~~~
 
-### Integration with OAuth Rich Authorization Requests
+## Integration with OAuth Rich Authorization Requests
 
-When the Authorization Server supports Rich Authorization Requests (RAR) as defined in [RFC9396](https://datatracker.ietf.org/doc/html/rfc9396), the authorization details captured during the authorization flow can provide valuable context for downstream authorization decisions. The RAR mechanism enables clients to specify fine-grained authorization requirements that may be captured, reviewed, and potentially consented to by the resource owner during the authorization process.
+When the Authorization Server (AS) supports Rich Authorization Requests (RAR) as defined in [RFC9396], the authorization details captured during the initial consent flow provide high-fidelity context for downstream agentic enforcement. The RAR mechanism allows a Resource Owner to grant permissions for specific, fine-grained actions (e.g., "Allow Agent to search only 'Research' folder") which are then encoded in the Access Token.
 
-Authorization Servers implementing RAR MAY include relevant authorization details within the access token. When the Txn-Token Service processes such access tokens to issue Transaction Tokens, it MAY extract these authorization details and include them within the agentic_ctx claim. This approach enables services deeper in the call chain to leverage authorization details for fine-grained access control decisions, even when the Authorization Server itself does not enforce policies based on all captured details.
+### Processing RAR Context
 
-This pattern offers several advantages:
-Deferred Policy Enforcement: Authorization details can be captured and validated at the Authorization Server without requiring immediate policy decisions on all details. Fine-grained authorization policies can be enforced closer to the resources being accessed.
+The Txn-Token Service (TTS) SHOULD extract relevant authorization details from the `authorization_details` claim of the `subject_token` and encapsulate them within the `agentic_ctx`. This ensures that the agent's execution environment remains bound by the specific constraints approved by the user.
 
-1. Context Enrichment: The authorization details provide additional context about the scope and nature of the authorized operation, enabling more informed authorization decisions throughout the service graph.
+### Data Mapping and Enrichment
 
-2. Consent Propagation: When user consent is obtained for specific authorization details, this consent context can be propagated through the Transaction Token to services that need to honor those consent decisions.
+1. **Extraction**: The TTS extracts the RAR array from the incoming Access Token.
+2. **Encapsulation**: The TTS SHOULD include these details in the `agentic_ctx` under a standardized key to allow downstream services to distinguish between general agent metadata and explicit user-granted permissions.
+3. **Policy Deferral**: This pattern allows the AS to capture intent without necessarily needing the domain-specific logic to enforce it; enforcement is deferred to the microservices deep in the call chain that receive the Txn-Token.
 
-3. Reduced Complexity: This approach allows businesses to avoid the complexity of implementing all fine-grained authorization checks at the Authorization Server, instead distributing authorization decisions to services with domain-specific knowledge.
+### Benefits of RAR Integration
 
-For example, an Authorization Server might capture detailed authorization requirements using RAR, obtain necessary user consent, and include these details in the access token. The Txn-Token Service can then extract relevant authorization details and include them in the agentic_ctx claim. Services receiving Transaction Tokens with authorization details in the agentic_ctx can use this information to make context-aware authorization decisions that respect the original authorization scope, user consent, and intended purpose of the operation. Implementations SHOULD carefully consider which authorization details are relevant for downstream services and avoid including sensitive information that is not necessary for authorization decisions in the call chain.
+* **Consent Propagation**: User-consented details are cryptographically bound to the Txn-Token, ensuring consent is honored throughout the service graph.
+* **Granular Control**: Services can make informed decisions based on the specific "type" and "actions" authorized in the original RAR object.
+* **Reduced Complexity**: Centralizing complex consent capture at the AS while distributing enforcement via the `agentic_ctx` reduces the architectural burden on individual workloads.
+
+### Example of `agentic_ctx` with additional context
+
+~~~ json
+"agentic_ctx": {
+    "agent_type": "tool-orchestrator",
+    "intent": "validate search services",
+    "authorization_details": [
+      {
+        "type": "search_service_access",
+        "actions": ["read", "list"],
+        "locations": ["https://api.search.example/v1"]
+      }
+    ],
+    "environment_constraints": {
+      "environment": "prod",
+      "region": "us"
+    }
+}
+~~~
+
+# Multi-agent flows
+In complex agentic workflows, a primary agent (the "Delegator") may delegate sub-tasks to one or more secondary agents ("Delegatees"). This document defines a mechanism to preserve the delegation lineage across these transitions. Note that preserving lineage is optional.
+
+## Agent-to-Agent Delegation 
+When an agent (the "Delegator") invokes another agent (the "Delegatee") to perform a sub-task, it SHOULD NOT pass its own Transaction Token to the Delegatee. Instead, the Delegator MUST obtain a narrowed Transaction Token for the Delegatee using the replacement flow defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html). The Delegator SHOULD request a restricted scope or purp (Purpose) that is specific to the sub-task assigned to the Delegatee. 
+
+## The 'actchain' (Actor Chain) Claim  
+
+The `actchain` claim is an OPTIONAL top-level JSON Web Token (JWT) claim that provides a cryptographic trace of the delegation path. It is represented as an ordered array of JSON objects, where each object represents a previous agent in the call chain.
+
+### Claim structure
+Each object within the `actchain` array MUST contain the following members:
+* **sub (Subject)**: REQUIRED. The identity of the delegating agent.
+* **iat (Issued At)**: OPTIONAL. A timestamp indicating when the delegating agent initiated its portion of the transaction.
+* **iss (Issuer)**: OPTIONAL. The issuer of the token that identified the delegating agent. This might be required in case of multiple Txn Token Services being present across domains and token is passed across domains.
+
+### Delegation via Replacement Flow
+When an agent requests a narrowed Transaction Token for a sub-agent, the Transaction Token Service (TTS) MUST follow the replacement flow procedures defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) with the following modifications:
+
+* **Subject Immutability**: The txn and `sub` (principal) claims MUST be copied from the subject_token to the new Transaction Token without modification.
+* **Chain Progression**: The TTS MUST extract the `act` claim from the incoming subject_token. This extracted object MUST be appended to the end of the `actchain` array in the new token.
+If no `actchain` existed in the subject_token, a new array is created containing only the extracted `act` object.
+* **New Actor Assignment**: The top-level act claim of the new token MUST be set to the identity of the Delegatee (the sub-agent).
+
+### Multi-agent example JWT body claims
+This example represents a delegated state: a human principal initiated a task via a Researcher Agent, which then delegated a specific action to a Search Agent.
+
+~~~ json
+{
+  "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e",
+  "sub": "user-77",
+  "iss": "https://txn-svc.trust-domain.example",
+  "iat": 1712850000,
+  "exp": 1712850300,
+  "act": {
+    "sub": "search-agent-v2",
+    "deployment": "prod-us-west-1"
+  },
+  "actchain": [
+    {
+      "sub": "researcher-agent-v1",
+      "iat": 1712849950
+    }
+  ],
+  "purp": "web.search.execute",
+  "agentic_ctx": {
+    "agent_type": "tool-orchestrator",
+    "intent": "validate search services",
+    "allowed_actions": ["read"],
+    "environment_constraints": {
+      "environment": "prod",
+      "region": "us"
+    }
+  }
+}
+~~~
 
 # Security Considerations
 
 1. All the security considerations mentioned in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) apply.
 
 2. Token Replay Protection Implementations MUST enforce strict token lifetime validation. The short-lived nature of Transaction Tokens helps mitigate replay attacks, but implementations SHOULD also consider:
-   2.1 Implementing token tracking mechanisms within trust domains
-   2.2 Validating token usage context
+   * Implementing token tracking mechanisms within trust domains
+   * Validating token usage context
 
-4. Actor Identity Security
-   3.1. Implementations MUST validate actor claims in tokens
-   3.2. The Txn-Token Service MUST verify the authenticity of actor context before token issuance
-   3.3. During replacement flow, Txn-Token Service MUST avoid replacing actor context in the incoming Txn-Token.
+3. Actor Identity Security
+   * Implementations MUST validate `act` claims in tokens
+   * The Txn-Token Service MUST verify the authenticity of actor context before token issuance
+   * During replacement flow, Txn-Token Service MUST NOT modify the `act` field in the incoming Txn-Token
 
 4. Principal Context Protection
-   4.1. Systems MUST prevent unauthorized modifications to principal context during token propagation. Txn-Token is cryptographically signed.
-   4.3. During replacement flow, Txn-Token Service MUST avoid replacing principal context in the incoming Txn-Token.
+   * Systems MUST prevent unauthorized modifications to the `sub` claim during token propagation. Txn-Tokens are cryptographically signed to ensure integrity. 
+   * During replacement flow, Txn-Token Service MUST NOT modify the `sub` claim in the incoming Txn-Token
+   * The Txn-Token Service MUST follow the subject population rules defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) to ensure proper principal representation 
 
 5. Transaction Chain Integrity
-   5.1. Implementations MUST maintain cryptographic integrity of the token chain
-   5.2. Services MUST validate tokens at trust domain boundaries
-   5.3. Systems MUST implement protection against token tampering during service-to-service communication
+   * Implementations MUST maintain cryptographic integrity of the token chain
+   * Services MUST validate tokens at trust domain boundaries
+   * Systems MUST implement protection against token tampering during service-to-service communication
 
 6. AI Agent Specific Controls
-   6.1. Implementations MUST enforce scope boundaries for AI agent operations
-   6.2. Systems SHOULD implement behavioral monitoring for AI agent activities by logging actor, principal in logs.
-   6.3. Systems MUST maintain audit trails of AI agent activities
+   * Implementations MUST enforce scope boundaries for AI agent operations
+   * Systems SHOULD implement behavioral monitoring for AI agent activities by logging `act` and `sub` claims in audit logs 
+   * Systems MUST maintain audit trails of AI agent activities
 
 7. Token Transformation Security
-   7.1. The Txn-Token Service MUST validate all claims during access token to Txn-Token conversion
-   7.2. Implementations MUST verify signatures and formats of all tokens
-   7.3. Systems MUST prevent unauthorized manipulation during token transformation
+   * The Txn-Token Service MUST validate all claims during access token to Txn-Token conversion
+   * Implementations MUST verify signatures and formats of all tokens
+   * Systems MUST prevent unauthorized manipulation during token transformation
+   * The Txn-Token Service MUST ensure that the `act` field accurately represents the agent identity from the access token
 
 8. Replacement Token Considerations
-   8.1. Systems MUST verify the authenticity and validity of original tokens before replacement
-   8.2. Systems MUST implement controls to prevent unauthorized replacement requests
+   * Systems MUST verify the authenticity and validity of original tokens before replacement
+   * Systems MUST implement controls to prevent unauthorized replacement requests
+   * The immutability of `act` and `sub` claims during replacement ensures consistent identity context throughout the transaction lifecycle 
 
 9. Infrastructure Security
-   9.1. All component communications MUST use secure channels
-   9.2. Implementations MUST enforce strong authentication of the Authorization Server
-   9.3. Systems MUST implement regular rotation of cryptographic keys
-   9.4. Trust domain boundaries MUST be clearly defined and enforced
-
+   * All component communications MUST use secure channels
+   * Implementations MUST enforce strong authentication of the Authorization Server
+   * Systems MUST implement regular rotation of cryptographic keys
+   * Trust domain boundaries MUST be clearly defined and enforced
+   
+10. Multi-Agent Considerations:
+    * Chain Depth and Bloat: Deeply nested agent calls can lead to significant JWT size increases, potentially impacting HTTP header limits. The TTS MAY impose a maximum depth for the `actchain`. If the maximum depth is exceeded, the TTS MUST either reject the request or truncate the oldest entries in the chain, provided that a "truncated" flag is added to the claim to alert downstream services of the loss of provenance.
+    * Privilege Escalation: A Delegator MUST NOT be able to request a replacement token with broader permissions or a higher-tier principal than what is asserted in its own subject_token. The TTS MUST validate that the requested scope and purp are a logical subset of the original token.
+    * The TTS MUST verify that the workload requesting a replacement token is the entity identified in the  `act` claim of the subject_token. This prevents an unauthorized workload from "injecting" itself into a transaction chain or extending a chain it is not part of.
+    * During the replacement flow, the TTS MUST NOT allow the modification of the `sub` (principal) or txn claims. These fields provide the "anchor" for the entire transaction; any modification would effectively initiate a new transaction, requiring a fresh authentication event rather than a replacement flow.
 
 # References
 
