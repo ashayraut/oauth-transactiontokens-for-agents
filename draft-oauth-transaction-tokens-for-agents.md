@@ -2,12 +2,12 @@
 title: "Transaction Tokens For Agents"
 category: info
 
-docname: draft-oauth-transaction-tokens-for-agents-06
+docname: draft-araut-oauth-transaction-tokens-for-agents-01
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
-v: 5
+v: 1
 # area: AREA
 # workgroup: WG Working Group
 keyword:
@@ -17,15 +17,14 @@ keyword:
 venue:
 #  group: WG
 #  type: Working Group
-#  mail: oauth@ietf.org
-#  arch: https://mailarchive.ietf.org/arch/browse/oauth
+#  mail: TBD
+#  arch: TBD
   github: "ashayraut/oauth-transactiontokens-for-agents"
   latest: "https://ashayraut.github.io/oauth-transactiontokens-for-agents/draft-oauth-transaction-tokens-for-agents.html"
 
 author:
  -
     fullname: ASHAY RAUT
-    organization: Amazon
     email: asharaut@amazon.com
 
 normative:
@@ -354,62 +353,52 @@ access token received from 3P agent and its own subject token (to authenticate w
 }
 ~~~
 
-#### Agentic Context
+## Agentic Context
 
 The Txn-Token MAY contain an `agentic_ctx` claim. Txn-Tokens are increasingly used in environments where transactions are executed by or with the assistance of autonomous or semi-autonomous agents (for example, Large Language Model (LLM)–based agents, workflow orchestrators, and policy-driven automation components). In such deployments, relying exclusively on subject identity and generic transaction parameters is insufficient to make robust authorization decisions. Additional information about the agent that is interpreting and acting on the transaction is often required.
 
-~~~ json
-"agentic_ctx": {
-  "agent_type": "planner+tool-orchestrator", // A string describing the functional role of the agent (for example, “planner”, “tool-orchestrator”, “data-assistant”, “code-execution-agent”). The semantics and allowed values are deployment-specific.
-  "agent_version": "3.4.2", // A string indicating a version or configuration identifier for the agent. This value can be used to associate the transaction with a particular, reviewed agent policy or release
-  "intent": "enumerate and validate production search services before Q4 traffic spike", // A string describing the high-level purpose of the transaction from the agent’s perspective (for example, “trade.stocks”, “enumerate.search.services”, “generate.billing.report”). This value is intended to support coarse-grained, intent-aware authorization policies.
-  "allowed_actions": ["read"],
-  "environment_constraints": { "environment": "prod", "region": "us" },
-}
-~~~
+### Field definitions and population
+All fields are OPTIONAL as some of these fields may not be avaiable for 3P (third party agents) connecting to your external service (edge) within trust domain. However, for internal agents within trust domain, you MAY get following information. For 3P agents outside your trust domain, as called out above, you will be able to get `act` claim information using access token and rest of the below fields in `agentic_context` may or may not be available.
 
-## Integration with OAuth Rich Authorization Requests
+* prov (Provenance): Defines the "Behavioral DNA" of the agent. The `manifest_hash` is a cryptographic digest of the agent’s system instructions and core logic, ensuring the agent’s "guardrails" have not been modified. The `manifest_hash` is an opaque key. Resource Servers are expected to resolve this hash against a local or remote policy store to determine the specific behavioral guardrails applied to the agent at that version.
+* posture (Environmental Integrity): Details the security tier of the runtime. This includes hardware-backed proof (e.g., TEE) that the agent is isolated from the host OS or cloud provider.
+* identity (Workload Origin): Captures the specific machine-actor instance. The `workload_id` distinguishes the instrument (the agent software) from the subject (the end-user).
 
-When the Authorization Server (AS) supports Rich Authorization Requests (RAR) as defined in [RFC9396], the authorization details captured during the initial consent flow provide high-fidelity context for downstream agentic enforcement. The RAR mechanism allows a Resource Owner to grant permissions for specific, fine-grained actions (e.g., "Allow Agent to search only 'Research' folder") which are then encoded in the Access Token.
+The `agentic_ctx` claim is populated during the token exchange process by the Transaction Token Service (TTS), which serves as the authoritative source for the agent’s operational identity. This context MAY be derived from various but not limited to sources such as : (1) Static Manifests, which include cryptographic hashes of the agent’s system prompt, model configuration, and registered source code identifiers; (2) Environmental Posture, consisting of telemetry injected by the execution environment or API gateway, such as the hardware security level (e.g., TEE measurements) or network origin; and (3) Workload Mapping, where attributes are mirrored from the agent’s primary workload identity (e.g., SPIFFE or OIDC claims). By centralizing this population at the TTS, the `agentic_ctx` provides a consistent and tamper-resistant representation of the agent’s "persona." This allows downstream resource servers to evaluate the agent’s integrity and origin against local safety policies independently of the specific actions or permissions requested in the transaction.
 
-### Processing RAR Context
-
-The Txn-Token Service (TTS) SHOULD extract relevant authorization details from the `authorization_details` claim of the `subject_token` and encapsulate them within the `agentic_ctx`. This ensures that the agent's execution environment remains bound by the specific constraints approved by the user.
-
-### Data Mapping and Enrichment
-
-1. **Extraction**: The TTS extracts the RAR array from the incoming Access Token.
-2. **Encapsulation**: The TTS SHOULD include these details in the `agentic_ctx` under a standardized key to allow downstream services to distinguish between general agent metadata and explicit user-granted permissions.
-3. **Policy Deferral**: This pattern allows the AS to capture intent without necessarily needing the domain-specific logic to enforce it; enforcement is deferred to the microservices deep in the call chain that receive the Txn-Token.
-
-### Benefits of RAR Integration
-
-* **Consent Propagation**: User-consented details are cryptographically bound to the Txn-Token, ensuring consent is honored throughout the service graph.
-* **Granular Control**: Services can make informed decisions based on the specific "type" and "actions" authorized in the original RAR object.
-* **Reduced Complexity**: Centralizing complex consent capture at the AS while distributing enforcement via the `agentic_ctx` reduces the architectural burden on individual workloads.
+To ensure the integrity of the `agentic_ctx`, the Transaction Token Service (TTS) MUST not rely on self-reported data from the agent. Instead, it populates these fields through a Verified Exchange model. Hardware-backed fields like `posture` and `tee` are derived from cryptographic Attestation Documents generated by the agent's execution environment (e.g., a Trusted Execution Environment) and verified by the TTS against cloud provider roots of trust. Software-related fields, such as the `manifest_hash`, are retrieved via a Registry-First approach: the TTS performs an out-of-band lookup in a secure Agent Registry using the agent’s authenticated client_id, ensuring that the "behavioral fingerprint" in the token matches the developer’s registered configuration rather than a potentially tampered runtime state. Finally, the identity claims are mirrored from the transport layer (e.g., mTLS certificates or SPIFFE SVIDs), binding the token to the specific verified workload instance.
 
 ### Example of `agentic_ctx` with additional context
 
 ~~~ json
-"agentic_ctx": {
-    "agent_type": "tool-orchestrator",
-    "intent": "validate search services",
-    "authorization_details": [
-      {
-        "type": "search_service_access",
-        "actions": ["read", "list"],
-        "locations": ["https://api.search.example/v1"]
-      }
-    ],
-    "environment_constraints": {
-      "environment": "prod",
-      "region": "us"
+{
+  "agentic_ctx": {
+    "prov": {
+      "manifest_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "model_id": "llama-3.1-70b-v1",
+      "version": "2.4.1"
+    },
+    "posture": {
+      "tee": "aws-nitro-enclave",
+      "assurance": "high",
+      "boot_gold": true
+    },
+    "identity": {
+      "workload_id": "spiffe://prod.acme.com/billing-agent",
+      "origin_node": "node-77-east-1"
     }
+  }
 }
 ~~~
 
+### Implementation Note: Integrity and Resolution
+The fields within `agentic_ctx` represent a "Statement of Posture" rather than a set of permissions. To avoid authorization failure, implementations should ensure that:
+* Registry Synchronization: The `manifest_hash` is treated as a lookup key. Resource Servers should maintain or have access to a known-good database of hashes to map cryptographic signatures to behavioral guardrails.
+* Hardware Roots of Trust: When `posture` claims are present, the Transaction Token Service MUST verify the underlying attestation document against the hardware manufacturer's public keys.
+* Non-Collusion: The `agentic_ctx` is distinct from the `sub` claim. While the `sub` identifies the authorizing principal, the `agentic_ctx` identifies the machine-actor. Authorization logic SHOULD evaluate the intersection of both identities.
+
 # Multi-agent flows
-In complex agentic workflows, a primary agent (the "Delegator") may delegate sub-tasks to one or more secondary agents ("Delegatees"). This document defines a mechanism to preserve the delegation lineage across these transitions. Note that preserving lineage is optional.
+There can be AI agents within the trust domain instead of traditional workloads. In complex agentic workflows within the trust domain , a primary agent (the "Delegator") may delegate sub-tasks to one or more secondary agents ("Delegatees"). This document defines a mechanism to preserve the delegation lineage across these transitions. Note that preserving lineage is optional.
 
 ## Agent-to-Agent Delegation 
 When an agent (the "Delegator") invokes another agent (the "Delegatee") to perform a sub-task, it SHOULD NOT pass its own Transaction Token to the Delegatee. Instead, the Delegator MUST obtain a narrowed Transaction Token for the Delegatee using the replacement flow defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html). The Delegator SHOULD request a restricted scope or purp (Purpose) that is specific to the sub-task assigned to the Delegatee. 
@@ -454,12 +443,19 @@ This example represents a delegated state: a human principal initiated a task vi
   ],
   "purp": "web.search.execute",
   "agentic_ctx": {
-    "agent_type": "tool-orchestrator",
-    "intent": "validate search services",
-    "allowed_actions": ["read"],
-    "environment_constraints": {
-      "environment": "prod",
-      "region": "us"
+    "prov": {
+      "manifest_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "model_id": "llama-3.1-70b-v1",
+      "version": "2.4.1"
+    },
+    "posture": {
+      "tee": "aws-nitro-enclave",
+      "assurance": "high",
+      "boot_gold": true
+    },
+    "identity": {
+      "workload_id": "spiffe://prod.acme.com/billing-agent",
+      "origin_node": "node-77-east-1"
     }
   }
 }
@@ -550,7 +546,8 @@ This example represents a delegated state: a human principal initiated a task vi
 --- back
 
 # Acknowledgments
-The authors would like to thank the contributors and the OAuth working group members who gave valuable input to this draft.
+name: Dr. Chunchi (Peter) Liu 
+email: Liuchunchi(Peter) <liuchunchi=40huawei.com@dmarc.ietf.org>
 
 # Contributors
 name: Atul Tulshibagwale
