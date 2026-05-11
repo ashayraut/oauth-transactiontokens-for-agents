@@ -398,68 +398,73 @@ The fields within `agentic_ctx` represent a "Statement of Posture" rather than a
 * Non-Collusion: The `agentic_ctx` is distinct from the `sub` claim. While the `sub` identifies the authorizing principal, the `agentic_ctx` identifies the machine-actor. Authorization logic SHOULD evaluate the intersection of both identities.
 
 # Multi-agent flows
-There can be AI agents within the trust domain instead of traditional workloads. In complex agentic workflows within the trust domain , a primary agent (the "Delegator") may delegate sub-tasks to one or more secondary agents ("Delegatees"). This document defines a mechanism to preserve the delegation lineage across these transitions. Note that preserving lineage is optional.
+In complex agentic workflows, a transaction often originates from a 3rd-party (3P) agent and propagates through one or more 1st-party (1P) agents within the local trust domain. To maintain Zero Trust integrity, this specification uses a structured Postured Lineage within the `agentic_ctx`. This ensures that downstream Resource Servers can evaluate the security posture of the entire chain, rather than relying solely on the identity of the immediate caller.
 
-## Agent-to-Agent Delegation 
-When an agent (the "Delegator") invokes another agent (the "Delegatee") to perform a sub-task, it SHOULD NOT pass its own Transaction Token to the Delegatee. Instead, the Delegator MUST obtain a narrowed Transaction Token for the Delegatee using the replacement flow defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html). The Delegator SHOULD request a restricted scope or purp (Purpose) that is specific to the sub-task assigned to the Delegatee. 
+## The Bifurcated Trust Model
 
-## The 'actchain' (Actor Chain) Claim  
+The `agentic_ctx` differentiates between two types of actors in a chain:
 
-The `actchain` claim is an OPTIONAL top-level JSON Web Token (JWT) claim that provides a cryptographic trace of the delegation path. It is represented as an ordered array of JSON objects, where each object represents a previous agent in the call chain.
+* **The Originator (External/3P)**: The entry point of the request into the trust domain. Because the hardware and software of 3P agents are outside local control, their context is Asserted via identity federation. Posture and provenance fields for these actors are typically marked as unverified or none.
 
-### Claim structure
-Each object within the `actchain` array MUST contain the following members:
-* **sub (Subject)**: REQUIRED. The identity of the delegating agent.
-* **iat (Issued At)**: OPTIONAL. A timestamp indicating when the delegating agent initiated its portion of the transaction.
-* **iss (Issuer)**: OPTIONAL. The issuer of the token that identified the delegating agent. This might be required in case of multiple Txn Token Services being present across domains and token is passed across domains.
+* **The Current Actor (Internal/1P)**: The agent currently executing the request. For internal agents, the context is Verified by the Transaction Token Service (TTS) using hardware attestation and registry-based manifest lookups.
+
+## Monotonic Attenuation of Trust
+
+A chain’s security posture is only as strong as its weakest link. The TTS MUST calculate a min_assurance_level during every token replacement flow. If a "High-Trust" internal agent is triggered by a "Low-Trust" 3P originator, the transaction’s overall assurance level remains low. This prevents Identity Laundering, where unverified external agents bypass security guardrails by proxying requests through internal services. The Transaction Token Service (TTS) determines the `min_assurance_level` by performing a comparative risk analysis during the token replacement flow. It essentially identifies the "weakest link" in the execution chain by comparing the posture of the incoming token with the verified posture of the new requesting agent.
 
 ### Delegation via Replacement Flow
-When an agent requests a narrowed Transaction Token for a sub-agent, the Transaction Token Service (TTS) MUST follow the replacement flow procedures defined in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) with the following modifications:
 
-* **Subject Immutability**: The txn and `sub` (principal) claims MUST be copied from the subject_token to the new Transaction Token without modification.
-* **Chain Progression**: The TTS MUST extract the `act` claim from the incoming subject_token. This extracted object MUST be appended to the end of the `actchain` array in the new token.
-If no `actchain` existed in the subject_token, a new array is created containing only the extracted `act` object.
-* **New Actor Assignment**: The top-level act claim of the new token MUST be set to the identity of the Delegatee (the sub-agent).
+When an internal agent (the "Delegatee") requires a Transaction Token to continue a chain initiated by another actor (the "Delegator"), it MUST follow the replacement flow procedures defined in [OAUTH-TXN-TOKENS] with the following modifications:
+
+* Subject Immutability: The `txn` and `sub` (principal) claims MUST be copied from the subject_token to the new Transaction Token without modification.
+* Lineage Preservation: The TTS MUST extract the identity of the Delegator from the incoming token and append it to the `txn_path` array.
+* Context Enrichment: The TTS MUST populate the `current_actor` object with verified telemetry (TEE posture, manifest hashes) corresponding to the Delegatee.
+
 
 ### Multi-agent example JWT body claims
-This example represents a delegated state: a human principal initiated a task via a Researcher Agent, which then delegated a specific action to a Search Agent.
+This example represents a delegated state: a 3rd-party Assistant (3p-assistant-ext-99) has initiated a task, which is now being executed by an internal, 1st-party Billing Agent (1p-billing-svc-v2) running in a secure enclave.
 
 ~~~ json
 {
-  "txn": "c2dc3992-2d65-483a-93b5-2dd9f02c276e",
-  "sub": "user-77",
-  "iss": "https://txn-svc.trust-domain.example",
+  "txn": "abc-123-xyz",
+  "sub": "user_8821@example.com",
+  "iss": "[https://txn-svc.trust-domain.example](https://txn-svc.trust-domain.example)",
   "iat": 1712850000,
   "exp": 1712850300,
-  "act": {
-    "sub": "search-agent-v2",
-    "deployment": "prod-us-west-1"
-  },
-  "actchain": [
-    {
-      "sub": "researcher-agent-v1",
-      "iat": 1712849950
-    }
-  ],
-  "purp": "web.search.execute",
+  "req_wl": "apigateway.trust-domain.example", // API gateway requests Txn-token
   "agentic_ctx": {
-    "prov": {
-      "manifest_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "model_id": "llama-3.1-70b-v1",
-      "version": "2.4.1"
+    "current_actor": {
+      "identity": { 
+        "workload_id": "1p-billing-svc-v2",
+        "origin_node": "internal-cluster-alpha-node-4"
+      },
+      "posture": { 
+        "tee": "aws-nitro-enclave", 
+        "assurance": "high" 
+      },
+      "prov": { 
+        "manifest_hash": "sha256:4455..." 
+      }
     },
-    "posture": {
-      "tee": "aws-nitro-enclave",
-      "assurance": "high",
-      "boot_gold": true
+    "originator": {
+      "identity": { "workload_id": "3p-assistant-ext-99" },
+      "posture": { 
+        "tee": "unverified", 
+        "assurance": "low" 
+      },
+      "prov": { "manifest_hash": "none" }
     },
-    "identity": {
-      "workload_id": "spiffe://prod.acme.com/billing-agent",
-      "origin_node": "node-77-east-1"
+    "chain_metadata": {
+      "hop_count": 2,
+      "min_assurance_level": "low",
+      "txn_path": ["3p-assistant-ext-99", "1p-billing-svc-v2"]
     }
   }
 }
 ~~~
+
+### Loop prevention
+To prevent infinite recursion in autonomous agentic loops, the `txn_path` MUST be updated at every hop. The TTS MUST append the current workload_id to the path. If an agent receives a token where its own `workload_id` is already present in the `txn_path`, the request MUST be rejected.
 
 # Security Considerations
 
@@ -505,12 +510,28 @@ This example represents a delegated state: a human principal initiated a task vi
    * Implementations MUST enforce strong authentication of the Authorization Server
    * Systems MUST implement regular rotation of cryptographic keys
    * Trust domain boundaries MUST be clearly defined and enforced
-   
-10. Multi-Agent Considerations:
-    * Chain Depth and Bloat: Deeply nested agent calls can lead to significant JWT size increases, potentially impacting HTTP header limits. The TTS MAY impose a maximum depth for the `actchain`. If the maximum depth is exceeded, the TTS MUST either reject the request or truncate the oldest entries in the chain, provided that a "truncated" flag is added to the claim to alert downstream services of the loss of provenance.
-    * Privilege Escalation: A Delegator MUST NOT be able to request a replacement token with broader permissions or a higher-tier principal than what is asserted in its own subject_token. The TTS MUST validate that the requested scope and purp are a logical subset of the original token.
-    * The TTS MUST verify that the workload requesting a replacement token is the entity identified in the  `act` claim of the subject_token. This prevents an unauthorized workload from "injecting" itself into a transaction chain or extending a chain it is not part of.
-    * During the replacement flow, the TTS MUST NOT allow the modification of the `sub` (principal) or txn claims. These fields provide the "anchor" for the entire transaction; any modification would effectively initiate a new transaction, requiring a fresh authentication event rather than a replacement flow.
+
+10. Prevention of Identity Laundering
+    * Implementations MUST enforce Monotonic Attenuation of the min_assurance_level.
+    * The TTS MUST NOT allow a replacement token to have a higher assurance level than the incoming subject token, even if the current actor is running in a   High-Assurance environment.
+    * This prevents a low-trust 3rd-party originator from "laundering" its identity through a high-trust internal agent to bypass security guardrails at the Resource Server.
+
+11. Integrity of the Agent Registry
+    * The security of the prov (Provenance) claims relies entirely on the integrity of the Agent Registry. If an attacker can modify the registry to associate a malicious `manifest_hash` with a legitimate `workload_id`, they can trick the TTS into asserting high software integrity for tampered code.
+    * Access to the Agent Registry MUST be restricted to authorized deployment pipelines and protected with strong integrity controls.
+
+12. Hardware Attestation Forgery
+    * When `posture` claims indicate the use of a Trusted Execution Environment (TEE), the TTS MUST verify the underlying Attestation Document against the hardware manufacturer’s Root of Trust.
+    * Failure to verify these signatures allows a compromised host to spoof a "High" assurance posture, leading to unauthorized access to sensitive data.
+
+13. Loop Detection and Recursion Limits
+    * The use of the `txn_path` is REQUIRED to prevent infinite recursion in autonomous agentic workflows.
+    * Resource Servers and the TTS SHOULD also enforce a `maximum hop_count` to prevent resource exhaustion attacks. If the path exceeds a defined threshold, the transaction MUST be terminated.
+
+14. Data Leakage in Lineage Propagation
+   * The `agentic_ctx` may contain sensitive internal information, such as origin_node or specific `workload_id` structures.
+   * When a 1st-party agent calls an external 3rd-party service, the TTS MUST strip these internal-only fields from the token to prevent infrastructure leakage.
+   * Only the minimum necessary identity context should be egressed from the trust domain.
 
 # References
 
