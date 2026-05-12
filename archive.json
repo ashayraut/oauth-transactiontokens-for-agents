@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-10T03:24:53.215755+00:00",
+  "timestamp": "2026-05-12T03:24:07.097611+00:00",
   "repo": "ashayraut/oauth-transactiontokens-for-agents",
   "labels": [
     {
@@ -158,7 +158,7 @@
       "labels": [],
       "body": "Hi Ashay,\n\nBj\u00f8rn Baunb\u00e6k and G\u00f6tz Wehberg from the Gimel Foundation here. This is a constructive prior-art notification for any future revision of draft-oauth-transaction-tokens-for-agents (currently -03, January 2026).\n\nThe transaction-token shape your draft proposes - short-lived, context-bound tokens minted per agent action with explicit actor and principal claims - is architecturally closer to where the AI-agent-authorization category needs to land than long-lived bearer tokens are. The Gimel Foundation has published a body of open-core specifications on AI-agent authorization that overlaps with at least three specific surfaces in the transaction-tokens-for-agents design space, and we wanted to put the references on the public record for any future revision.\n\n**Three concrete touch-points** (not necessarily limited to these):\n\n1. Actor and principal claims as candidate PoA Credential mapping. The actor and principal claims in your draft directly correspond to the principal-agent model formalized in GiFo-RFC 0115 (Power-of-Attorney Credential Structure). RFC 0115 carries a richer mandate object \u2014 principal, agent, scope, delegation chain, expiry, narrowing rules \u2014 that the actor / principal pair could be mapped onto in a future companion document or revision, in cases where the calling context needs to carry not just \"who is acting on whose behalf\" but also \"what mandate authorizes that act and to what scope\".\n2. Multi-hop scope narrowing \u2014 already specified in GiFo-RFC 0115 \u00a73.7. Once transaction tokens chain across multiple agent hops (Agent A \u2192 Agent B \u2192 Resource), the scope-monotonicity question becomes load-bearing. RFC 0115 \u00a73.7 specifies mandatory scope narrowing: a sub-agent's credential can only narrow, never broaden, the parent's scope, and this is enforced cryptographically rather than by IdP policy lookup. This is the surface the broader category also names variously as \"secure agent-to-agent delegation\" and \"agent-to-agent authorization\". When that work intersects transaction-tokens-for-agents in a future revision, RFC 0115 \u00a73.7 is published prior art.\n3. Runtime validation of extended / per-action OAuth tokens. The token shape your draft proposes \u2014 a short-lived OAuth token with extended claims (actor, principal, transaction-bound context) that the resource server validates per action rather than per session \u2014 is structurally an extended OAuth token in the sense formalized by GiFo-RFC 0111 (Extended OAuth Tokens, Summer 2025). \n\nPlease note, this is patent-pending technology of Gimel Foundation.\n\n**One request for a future revision** (or a companion document)\nA Related Work / Informative Reference entry naming GiFo-RFC 0111 and GiFo-RFC 0115 as the closest published prior-art surfaces for the three touch-points above. \n\n**What this is currently not**\nNot an infringement assertion against draft-oauth-transaction-tokens-for-agents-03 or any successor.\nNot a request to change the substantive normative content of the draft itself.\nNot a contribution.\n\nSpecs are at https://github.com/Gimel-Foundation. \n\nHappy to provide section-level pointers or take a call.\n\nBj\u00f8rn Baunb\u00e6k and G\u00f6tz Wehberg, on behalf of Gimel Foundation",
       "createdAt": "2026-05-03T03:55:46Z",
-      "updatedAt": "2026-05-09T04:31:06Z",
+      "updatedAt": "2026-05-11T17:31:45Z",
       "closedAt": "2026-05-08T16:46:48Z",
       "comments": [
         {
@@ -195,6 +195,13 @@
           "body": "@GoetzGW As explained in my original response, if you wish your claim of prior art to be considered then please [file an IPR disclosure](https://datatracker.ietf.org/ipr/about/).  IPR disclosures include important information for IETF participants to consider including any relevant patents and proposed licensing terms.  By filing an IPR disclosure you are not assigning the IETF any form of license to your claimed intellectual property. \n\nAny message you post in this repository will be considered an IETF Contribution, the guidelines for contributing to this repository are unambiguous on that point.",
           "createdAt": "2026-05-09T04:31:06Z",
           "updatedAt": "2026-05-09T04:31:06Z"
+        },
+        {
+          "author": "GoetzGW",
+          "authorAssociation": "NONE",
+          "body": "@JayDaley \u2013 flagging prior art is fair behaviour, we were doing this in good faith.\n\nFor the avoidance of doubt, Gimel Foundation does not grant any IP rights to IETF at this point. Our IP rights are constrained, limited and subject to Exclusions, based on Gimel Foundation licensing, Legal Terms, with patents pending. Gimel Foundation\u2019s GitHub page (https://github.com/Gimel-Foundation) is providing the canonical licensing and legal terms. \n\nGimel Foundation would be open to discuss questions and licensing under the Gimel framework that works for both sides.\n",
+          "createdAt": "2026-05-11T17:23:10Z",
+          "updatedAt": "2026-05-11T17:31:45Z"
         }
       ]
     }
