@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-06T02:35:29.350913+00:00",
+  "timestamp": "2026-08-25T01:15:56.136595+00:00",
   "repo": "ashayraut/oauth-transactiontokens-for-agents",
   "labels": [
     {
@@ -264,6 +264,22 @@
           "updatedAt": "2026-08-04T19:27:18Z"
         }
       ]
+    },
+    {
+      "number": 12,
+      "id": "I_kwDOP8bteM8AAAABN6Mvfg",
+      "title": "Affiliation missing",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/12",
+      "state": "OPEN",
+      "author": "ashayraut",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "List your employer or sponsor in the author/affiliation boilerplate of the document",
+      "createdAt": "2026-08-23T18:25:26Z",
+      "updatedAt": "2026-08-23T18:25:26Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
