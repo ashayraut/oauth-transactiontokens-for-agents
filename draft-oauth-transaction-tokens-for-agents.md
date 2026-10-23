@@ -2,7 +2,7 @@
 title: "Transaction Tokens For Agents"
 category: info
 
-docname: draft-araut-oauth-transaction-tokens-for-agents-02
+docname: draft-araut-oauth-transaction-tokens-for-agents-03
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -11,9 +11,10 @@ v: 1
 # area: AREA
 # workgroup: WG Working Group
 keyword:
- - next generation
- - unicorn
- - sparkling distributed ledger
+ - transaction tokens
+ - agentic AI
+ - multi-agent authorization
+ - zero trust
 venue:
 #  group: WG
 #  type: Working Group
@@ -34,8 +35,6 @@ informative:
 ...
 
 --- abstract
-
-This document specifies an extension to the to support agent context propagation within Transaction Tokens for agent-based workloads. The extension defines the use of the `act` field to identify the agent performing the action, and leverages the existing `sub` field (as defined in the base Transaction Tokens specification) to represent the principal. The `sub` field is populated according to the rules specified in [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html), based on the 'subject_token' provided in the token request. For autonomous agents operating independently, the `sub` field represents the agent itself. These mechanisms enable services within the call graph to make more granular access control decisions, thereby enhancing security. 
 
 This document specifies an extension to OAuth Transaction Tokens
 [OAUTH-TXN-TOKENS](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html) to support agent context propagation within
@@ -113,7 +112,7 @@ specification.  When the caller is not identified as an agent, the
 TTS follows the base specification rules without modification.
 Deployments without an Agent Registry MAY still populate
 `agentic_ctx` using information derivable from the token exchange
-flow itself (e.g., `current_actor` from `client_id`, `hop_count`
+flow itself (e.g., `proximate_agent` from `client_id`, `hop_count`
 from replacement count).
 
 This extension leverages the existing Txn-Token infrastructure to
@@ -168,6 +167,33 @@ that maintains a registry of known agent identities.  The TTS MAY
 use the Agent Registry to determine whether a requesting workload
 is an agent and to source metadata for `agentic_ctx` population.
 The presence of an Agent Registry is RECOMMENDED but not required.
+
+Proximate Agent:
+The agent whose request caused the current Transaction Token to be
+issued or most recently replaced.  In a multi-agent chain, this is
+the agent at the current hop — the one closest to the resource
+being accessed at the time of the token exchange.  Represented in
+the `proximate_agent` field of `agentic_ctx`.
+
+Originating Agent:
+The agent that initiated the transaction chain by causing the
+initial Transaction Token to be issued.  This agent's identity is
+preserved immutably throughout all replacement flows.  Represented
+in the `originator` field of `agentic_ctx`.
+
+Inference Layer:
+The component of an agent system that runs the AI model (e.g., an
+LLM), processes inputs, generates plans, and produces tool calls or
+outputs.  The inference layer operates on data presented to it and
+has no inherent awareness of the security context of the surrounding
+system.
+
+Infrastructure Layer:
+The component of an agent system that executes tool calls, manages
+network I/O, enforces security policies, and interacts with external
+services including the Transaction Token Service.  The infrastructure
+layer is responsible for token acquisition and exchange and operates
+independently of the inference layer's outputs.
 
 ---
 
@@ -224,7 +250,7 @@ occur:
    user start request using agent within trust domain. If no Agent Registry is
    available, the TTS MAY still populate `agentic_ctx` using
    information derivable from the token exchange (e.g., `client_id`
-   as `current_actor`).
+   as `proximate_agent`).
 
 10. The Txn-Token Service issues the Txn-Token to the requesting
    workload.
@@ -369,8 +395,11 @@ extends the replacement flow with agent-specific behavior.
 When a workload identified as an agent receives a Transaction Token
 and intends to invoke a downstream workload, it SHOULD request a
 replacement Txn-Token from the TTS before making the downstream call.
-This ensures that `agentic_ctx` accurately reflects the current
-executing agent and that chain integrity metadata is maintained.
+Failure to do so results in stale `agentic_ctx` metadata that does
+not reflect the actual execution path; deployments enforcing chain
+integrity policies based on `hop_count` or `min_assurance_level`
+MUST treat such tokens as non-compliant (see Section 3.4 paragraph
+below).
 
 If a deployment enforces chain integrity policies based on
 `hop_count` or `min_assurance_level`, then agents MUST request
@@ -398,8 +427,14 @@ the base specification replacement rules:
 
 *  The `agentic_ctx` claim MUST be updated as follows:
 
-   -  The `current_actor` field MUST be set to the identifier of the
+   -  The `proximate_agent` field MUST be set to the identifier of the
       new requesting agent.
+
+   -  If `proximate_agent_session_id` is present, it MUST be updated
+      to reflect the session identifier of the new requesting agent.
+
+   -  The `originator_session_id` field, if present, MUST NOT be
+      modified.
 
    -  The `chain_metadata.hop_count` MUST be incremented by one.
 
@@ -437,7 +472,7 @@ and they can do additional authorization checks.
 | req_wl: apigw    |  --- append ----> | req_wl: apigw,1P |
 +------------------+                    +------------------+
 | agentic_ctx:     |                    | agentic_ctx:     |
-|  current: 3P     |  --- update ----> |  current: 1P     |
+|  proximate: 3P   |  --- update ----> |  proximate: 1P   |
 |  originator: 3P  |  --- immutable -> |  originator: 3P  |
 |  hop_count: 1    |  --- increment -> |  hop_count: 2    |
 |  min_assur: (opt)|  --- attenuate -> |  min_assur: (opt)|
@@ -483,7 +518,7 @@ user.
     "quantity": "100"
   },
   "agentic_ctx": {
-    "current_actor": "agent-identity-1",
+    "proximate_agent": "agent-identity-1",
     "originator": "agent-identity-1",
     "chain_metadata": {
       "hop_count": 1
@@ -528,18 +563,23 @@ therefore cannot verify their operational posture to the same degree.
 The following fields within `agentic_ctx` are defined by this
 specification:
 
-current_actor:
-:  REQUIRED.  A string identifying the agent currently executing the
-   request.  The value is the agent's identifier as determined by the
-   TTS (e.g., from Agent Registry lookup, `client_id`, or `act.sub`).
-   This field is updated during replacement flows when the new caller
-   is identified as an agent.
+proximate_agent:
+:  REQUIRED.  A string identifying the agent whose request caused
+   the current token to be issued or most recently replaced.  At
+   initial issuance, the TTS sets this field to the agent identifier
+   derived from the access token (via `act.sub`, Agent Registry
+   lookup, or `client_id` — in that priority order).  At each
+   replacement where the requesting workload is identified as an
+   agent, the TTS updates this field to that agent's identifier.
+   When the requesting workload is not identified as an agent, this
+   field MUST NOT be modified.  Resource Servers SHOULD use this
+   field when evaluating chain integrity policies.
 
 originator:
 :  REQUIRED.  A string identifying the agent that initiated the
    transaction chain.  This value is set when the initial Txn-Token
    is issued and MUST NOT be modified during replacement flows.  For
-   single-agent flows, `originator` and `current_actor` have the
+   single-agent flows, `originator` and `proximate_agent` have the
    same value.  The `originator` field exists to support
    authorization policy evaluation in scenarios where the `act` claim
    is absent (e.g., autonomous agent flows using Client Credentials
@@ -547,7 +587,10 @@ originator:
    present, the `originator` value will typically match `act.sub`.
    This field ensures that the chain origin is always available
    within `agentic_ctx` regardless of whether the transaction
-   involves human delegation.
+   involves human delegation.  Resource Servers SHOULD use this
+   field for authorization policies that depend on the identity of
+   the chain originator, particularly in deployments where the
+   `act` claim may be absent.
 
 chain_metadata:
 :  REQUIRED.  A JSON object containing chain-level integrity
@@ -557,7 +600,9 @@ chain_metadata:
    :  REQUIRED.  An integer representing the number of agent
       transitions in the current chain.  Set to 1 at initial
       issuance.  Incremented by 1 at each replacement where the
-      caller is identified as an agent.
+      caller is identified as an agent.  Resource Servers SHOULD
+      evaluate this value against deployment-defined maximum hop
+      limits when making authorization decisions.
 
    min_assurance_level:
    :  OPTIONAL.  A string representing the minimum assurance level
@@ -572,6 +617,35 @@ chain_metadata:
       define their own ordered set and comparison function.  Non-
       normative examples include: "unverified", "low", "medium",
       "high".
+
+proximate_agent_session_id:
+:  OPTIONAL.  A string identifying the session of the proximate
+   agent as known to that agent's own runtime or infrastructure
+   (e.g., a session identifier assigned by the agent's runtime
+   framework, harness, or SDK).  This field is self-asserted by the
+   agent's infrastructure layer and is therefore informational only.
+   Resource Servers and the TTS MUST NOT use this field as an
+   authorization criterion.  Its purpose is operational correlation:
+   a workload that observes unexpected behavior may share the `txn`
+   claim and this field with the proximate agent's owning team,
+   enabling that team to locate the corresponding session in their
+   own runtime logs for debugging or revocation.  This field MUST
+   be updated alongside `proximate_agent` during replacement flows
+   so that it always reflects the session of the current proximate
+   agent.
+
+originator_session_id:
+:  OPTIONAL.  A string identifying the session of the originating
+   agent as known to that agent's own runtime or infrastructure.
+   This value is set at initial token issuance and MUST NOT be
+   modified during replacement flows, mirroring the immutability of
+   the `originator` field.  The trust model and acceptable sources
+   are identical to `proximate_agent_session_id`: the value is
+   self-asserted and informational only.  Resource Servers and the
+   TTS MUST NOT use this field as an authorization criterion.  Its
+   purpose is to allow a workload or the TTS to cross-reference the
+   originating agent's runtime logs independently of the proximate
+   agent when investigating a transaction chain.
 
 
 ### 3.6.2. Deployment-Specific Fields
@@ -616,8 +690,10 @@ normative fields:
 ~~~ json
 {
   "agentic_ctx": {
-    "current_actor": "spiffe://prod.acme.com/billing-agent",
+    "proximate_agent": "spiffe://prod.acme.com/billing-agent",
+    "proximate_agent_session_id": "sess-a3f7c9d2b1e4",
     "originator": "3p-assistant-ext-99",
+    "originator_session_id": "sess-7b2e1a9f4c03",
     "chain_metadata": {
       "hop_count": 2,
       "min_assurance_level": "low"
@@ -643,7 +719,10 @@ normative fields:
 Note: The `posture`, `prov`, and `identity` fields shown above are
 deployment-specific examples.  Their structure and semantics are
 determined by the trust domain's policies and are not defined by
-this specification.
+this specification.  The `proximate_agent_session_id` and
+`originator_session_id` fields are informational only; their values
+are supplied by the respective agent's infrastructure layer and
+MUST NOT be used as authorization criteria.
 
 ### 3.6.4. Implementation Guidance
 
@@ -651,7 +730,7 @@ The following guidance applies to implementations using
 deployment-specific fields within `agentic_ctx`:
 
 *  Resource Servers receiving a Txn-Token with `agentic_ctx` SHOULD
-   evaluate the normative fields (`current_actor`, `originator`,
+   evaluate the normative fields (`proximate_agent`, `originator`,
    `chain_metadata`) for chain integrity decisions.
 
 *  Resource Servers MAY evaluate deployment-specific fields against
@@ -692,18 +771,18 @@ determination:
 
 3. If the `client_id` resolves to a registered agent:
 
-   -  The TTS SHOULD apply the agent-specific token issuance rules
+   -  The TTS MUST apply the agent-specific token issuance rules
       defined in this specification.
-   -  The TTS SHOULD populate the `agentic_ctx` claim with at minimum
+   -  The TTS MUST populate the `agentic_ctx` claim with at minimum
       the normative fields defined in Section 3.6.1.
    -  If the access token contains an `act` claim, the TTS MUST copy
       it to the Txn-Token without modification.
 
 4. If the `client_id` does NOT resolve to a registered agent:
 
-   -  The TTS SHOULD follow the base specification [OAUTH-TXN-TOKENS]
+   -  The TTS MUST follow the base specification [OAUTH-TXN-TOKENS]
       rules without modification.
-   -  The TTS SHOULD NOT populate an `agentic_ctx` claim.
+   -  The TTS MUST NOT populate an `agentic_ctx` claim.
 
 In deployments without an Agent Registry, the TTS MAY use alternative
 mechanisms to identify agents, such as:
@@ -740,6 +819,117 @@ specification.  Deployments MAY use existing service registries,
 dedicated agent catalogs, or policy engines to fulfill this role.
 
 ---
+
+## 3.8. Token Exchange Isolation
+
+Agent systems typically consist of two distinct functional layers:
+
+*  The *inference layer*: The component that runs the LLM or AI
+   model, processes natural language, generates plans, and produces
+   tool calls or outputs.
+
+*  The *infrastructure layer*: The component that executes tool
+   calls, manages network I/O, enforces security policies, and
+   interacts with external services including the Transaction Token
+   Service.
+
+The token exchange mechanism defined by this specification —
+including Txn-Token acquisition and replacement requests — MUST be
+implemented in the infrastructure layer and MUST NOT be callable or
+bypassable by the inference layer.  This requirement exists because
+an LLM can be adversarially influenced (e.g., through prompt
+injection or jailbreak attacks) to issue instructions that attempt
+to subvert authorization controls.  Placing the token exchange
+logic in the infrastructure layer ensures these controls remain
+effective regardless of LLM output.
+
+Specifically:
+
+*  Token exchange logic MUST NOT be exposed as a tool, function, or
+   capability that the LLM can invoke directly.
+
+*  The LLM's output MUST NOT be used as direct input to Txn-Token
+   exchange requests without validation and approval by the
+   infrastructure layer.
+
+*  Access tokens, Txn-Tokens, and other credential material MUST
+   NOT appear in the LLM's context window, prompt, or generated
+   output.
+
+*  The infrastructure layer MUST submit Txn-Token requests for all
+   calls to protected resources, regardless of whether the LLM's
+   output attempts to indicate otherwise.
+
+The following non-normative architectural patterns satisfy this
+requirement:
+
+*  *Agent Harness or Framework SDK*: A runtime wrapper around the
+   LLM that intercepts tool calls and performs token exchange
+   transparently before executing calls to downstream services.
+   The LLM sees only tool results, never credential material.
+
+*  *Agent Gateway or Proxy*: A network-layer component that
+   intercepts outbound calls from the agent process and performs
+   token exchange before forwarding.  The agent process never
+   handles tokens directly.
+
+*  *Sidecar Container*: A co-deployed process responsible for token
+   exchange that communicates with the agent container over a local
+   interface, keeping credential material out of the agent's
+   address space.
+
+The specific pattern is deployment-defined.  What is normatively
+REQUIRED is that the token exchange function cannot be skipped or
+manipulated by output from the inference layer.  Deployments SHOULD
+document and enforce the trust boundary between the inference layer
+and the infrastructure layer as part of their security model.
+
+---
+
+## 3.9. TTS Audit Logging
+
+The Transaction Token Service is the only party that observes every
+token exchange in a transaction chain.  At initial issuance and at
+each replacement, the TTS receives the requesting workload's
+credentials and, when present, the `proximate_agent_session_id`
+value supplied by the agent's infrastructure layer.  This positions
+the TTS as the authoritative audit ledger for the full agent chain,
+complementing the token itself which carries only the proximate and
+originating agents.
+
+The TTS SHOULD maintain a persistent audit log.  Without a
+persistent log, offline reconstruction of the full agent call chain
+for a given transaction is not possible, limiting incident response
+to the information visible in individual tokens.  For each token
+issuance or replacement request, the log entry SHOULD capture at
+minimum:
+
+*  The transaction identifier (`txn` claim value).
+*  A timestamp of the exchange request.
+*  The resolved agent identifier for the requesting workload (from
+   Agent Registry lookup or `client_id`).
+*  The `proximate_agent_session_id` value as presented in the
+   request, if provided.
+*  The `originator_session_id` value, if present in the token
+   (relevant at initial issuance when the originating agent provides it).
+*  Whether the request was an initial issuance or a replacement.
+*  The resulting `hop_count` in the issued token.
+
+This log enables offline reconstruction of the complete agent call
+chain for a given `txn`, including all intermediate hops that are
+not individually visible in any single token.  A workload that
+shares the `txn` value with the TTS operator can obtain the full
+chain history, while a workload that also shares a
+`proximate_agent_session_id` or `originator_session_id` value allows
+the relevant agent's owning team to locate the corresponding session
+in their own runtime logs.
+
+The TTS audit log is a security-sensitive resource.  Access to it
+MUST be restricted to authorized parties.  The TTS SHOULD protect
+the log with tamper-evident storage to preserve its integrity as a
+forensic record.
+
+---
 # 4. Multi-Agent Flows
 
 In complex agentic workflows, a transaction often originates from a
@@ -754,7 +944,7 @@ of the immediate caller.
 ## 4.1. External vs. Internal Agents
 
 The `agentic_ctx` differentiates between two categories of agents
-through the normative `current_actor` and `originator` fields:
+through the normative `proximate_agent` and `originator` fields:
 
 External Agents (3P):
 :  Agents that are not owned or controlled by the trust domain.  They
@@ -771,7 +961,7 @@ Internal Agents (1P):
    controlled by the trust domain operator.  The TTS has full ability
    to verify their operational posture through internal mechanisms
    (Agent Registry, hardware attestation, transport-layer identity).
-   Their identity is reflected in the `current_actor` field during
+   Their identity is reflected in the `proximate_agent` field during
    replacement flows.  Deployment-specific fields for internal agents
    can be richly populated from verified sources.
 
@@ -798,7 +988,7 @@ context the TTS can populate within `agentic_ctx`.
 |  |                                                  |          |
 |  | For EXTERNAL (3P) agent:        For INTERNAL (1P) agent:   |
 |  | +-----------------------+       +------------------------+ |
-|  | | current_actor: 3P-id  |       | current_actor: 1P-id   | |
+|  | | proximate_agent: 3P-id  |       | proximate_agent: 1P-id   | |
 |  | | originator: 3P-id     |       | originator: 3P-id      | |
 |  | | chain_metadata:       |       | chain_metadata:        | |
 |  | |   hop_count: 1        |       |   hop_count: 2         | |
@@ -848,7 +1038,7 @@ SHOULD follow the replacement flow procedures defined in
    agent delegation and MUST NOT change throughout the transaction
    lifetime.
 
-*  Current Actor Update: The `current_actor` field MUST be set to
+*  Current Actor Update: The `proximate_agent` field MUST be set to
    the Delegatee's identifier.
 
 *  Chain Metadata Update: The TTS MUST increment `hop_count` and,
@@ -890,7 +1080,7 @@ Flow description:
    issues the initial Txn-Token with:
    -  `sub` populated from the `subject_token` (the user)
    -  `act` copied from the access token: `{"sub": "3p-assistant-ext-99"}`
-   -  `agentic_ctx.current_actor` set to "3p-assistant-ext-99"
+   -  `agentic_ctx.proximate_agent` set to "3p-assistant-ext-99"
    -  `agentic_ctx.originator` set to "3p-assistant-ext-99"
    -  `agentic_ctx.chain_metadata.hop_count` set to 1
    -  `req_wl` set to the API Gateway's identifier
@@ -906,7 +1096,7 @@ Flow description:
    replacement Txn-Token with:
    -  `sub`, `txn`, `aud` unchanged
    -  `act` unchanged: `{"sub": "3p-assistant-ext-99"}`
-   -  `agentic_ctx.current_actor` updated to "1p-billing-svc-v2"
+   -  `agentic_ctx.proximate_agent` updated to "1p-billing-svc-v2"
    -  `agentic_ctx.originator` unchanged: "3p-assistant-ext-99"
    -  `agentic_ctx.chain_metadata.hop_count` incremented to 2
    -  `req_wl` appended with the internal agent's identifier
@@ -938,7 +1128,7 @@ Flow description:
     |              |             |           |  sub=user                  |
     |              |             |           |  act={3P}                  |
     |              |             |           |  agentic_ctx:              |
-    |              |             |           |    current_actor=3P        |
+    |              |             |           |    proximate_agent=3P        |
     |              |             |           |    originator=3P           |
     |              |             |           |    hop_count=1             |
     |              |             |           |            |               |
@@ -965,7 +1155,7 @@ Flow description:
     |              |             |           |  sub=user (unchanged)      |
     |              |             |           |  act={3P} (unchanged)      |
     |              |             |           |  agentic_ctx:              |
-    |              |             |           |    current_actor=1P        |
+    |              |             |           |    proximate_agent=1P        |
     |              |             |           |    originator=3P           |
     |              |             |           |    hop_count=2             |
     |              |             |           |            |               |
@@ -982,7 +1172,7 @@ Flow description:
     |              |             |           |            |    - act={3P}  |
     |              |             |           |            |    - hop=2     |
     |              |             |           |            |    - orig=3P   |
-    |              |             |           |            |    - cur=1P    |
+    |              |             |           |            |    - prox=1P   |
     |              |             |           |            |               |
 ```
 
@@ -1007,7 +1197,7 @@ showing only normative fields:
     "sub": "3p-assistant-ext-99"
   },
   "agentic_ctx": {
-    "current_actor": "1p-billing-svc-v2",
+    "proximate_agent": "1p-billing-svc-v2",
     "originator": "3p-assistant-ext-99",
     "chain_metadata": {
       "hop_count": 2
@@ -1040,7 +1230,7 @@ posture fields:
     "sub": "3p-assistant-ext-99"
   },
   "agentic_ctx": {
-    "current_actor": "1p-billing-svc-v2",
+    "proximate_agent": "1p-billing-svc-v2",
     "originator": "3p-assistant-ext-99",
     "chain_metadata": {
       "hop_count": 2,
@@ -1108,28 +1298,32 @@ attacks, but implementations SHOULD also consider:
 
 ### Transaction Chain Integrity
 
-*  Implementations MUST maintain cryptographic integrity of the token
-   chain.
+*  Services MUST verify the cryptographic signature of every
+   Txn-Token before processing its claims.
 *  Services MUST validate tokens at trust domain boundaries.
-*  Systems MUST implement protection against token tampering during
-   service-to-service communication.
+*  Service-to-service communication carrying Txn-Tokens SHOULD use
+   mutually authenticated, encrypted channels (e.g., mTLS) to
+   prevent tampering in transit.
 
 ### AI Agent Specific Controls
 
-*  Implementations MUST enforce scope boundaries for AI agent
-   operations.
+*  Implementations MUST enforce the `scope` attenuation rules
+   defined in Section 3.4.1, ensuring agent operations cannot
+   exceed the scopes granted at initial token issuance.
 *  Systems SHOULD implement behavioral monitoring for AI agent
    activities by logging `act`, `sub`, and `agentic_ctx` claims in
    audit logs.
-*  Systems MUST maintain audit trails of AI agent activities.
+*  Systems SHOULD maintain audit trails of AI agent activities,
+   including the `txn` claim and `hop_count`, to support incident
+   response.
 
 ### Token Transformation Security
 
 *  The Txn-Token Service MUST validate all claims during access token
    to Txn-Token conversion.
 *  Implementations MUST verify signatures and formats of all tokens.
-*  Systems MUST prevent unauthorized manipulation during token
-   transformation.
+*  Systems MUST use authenticated, encrypted channels for token
+   exchange requests to prevent interception or manipulation.
 *  The Txn-Token Service MUST ensure that the `act` field accurately
    represents the actor identity from the access token.
 
@@ -1145,11 +1339,17 @@ attacks, but implementations SHOULD also consider:
 
 ### Infrastructure Security
 
-*  All component communications MUST use secure channels.
-*  Implementations MUST enforce strong authentication of the
-   Authorization Server.
-*  Systems MUST implement regular rotation of cryptographic keys.
-*  Trust domain boundaries MUST be clearly defined and enforced.
+*  All component communications MUST use mutually authenticated,
+   encrypted channels (e.g., TLS with certificate validation).
+*  The TTS MUST authenticate the requesting workload before issuing
+   or replacing a Txn-Token, using the access token presented in
+   the exchange request.
+*  Implementations SHOULD rotate cryptographic signing keys for
+   Txn-Tokens on a regular schedule to limit the exposure window
+   of a compromised key.
+*  Deployments SHOULD document and enforce trust domain boundaries
+   to ensure Txn-Tokens are only accepted within their intended
+   scope.
 
 ### Prevention of Identity Laundering
 
@@ -1240,6 +1440,47 @@ attacks, but implementations SHOULD also consider:
 *  Resource Servers SHOULD be aware that in deployments without
    mandatory replacement, `hop_count` represents a lower bound on
    the actual number of agent transitions.
+
+### Agent Session Identifiers
+
+The `proximate_agent_session_id` and `originator_session_id` fields
+are self-asserted by the respective agent's infrastructure layer and
+carry no cryptographic verification.  Both fields MUST NOT influence authorization decisions.  Their security scope is
+intentionally narrow: they exist to enable cross-system operational
+correlation between workload audit logs and agent runtime logs during
+incident response.
+
+Because these fields cannot be verified by the TTS or Resource
+Servers, a malicious agent could report a fabricated or another
+session's identifier.  The consequence is limited to misleading
+audit trails rather than enabling unauthorized access, since the
+fields MUST NOT be used for access control.
+
+Workload operators relying on these fields for incident response
+SHOULD treat them as advisory hints, corroborated by the immutable
+`txn` claim and other verified claims in the token.  The `txn`
+claim and `hop_count` together uniquely identify each token in the
+chain and provide the authoritative correlation handle for
+security-sensitive analysis.
+
+### Token Exchange Isolation
+
+*  Placing token exchange logic within reach of the LLM's inference
+   context (e.g., as a callable tool, a prompt variable, or an
+   accessible environment secret) creates an attack surface where
+   adversarial inputs — such as prompt injection attacks — can
+   manipulate, bypass, or exfiltrate credential material.
+
+*  Deployments MUST enforce the isolation requirement defined in
+   Section 3.8.  Failure to do so undermines the authorization
+   guarantees provided by the Txn-Token mechanism.
+
+*  A Txn-Token does not carry in-band evidence that token exchange
+   isolation was enforced; this remains a deployment-level guarantee.
+   Deployments SHOULD use out-of-band attestation mechanisms (e.g.,
+   hardware attestation of the agent infrastructure, signed deployment
+   manifests) to provide Resource Servers with assurance that the
+   isolation policy defined in Section 3.8 was in effect.
 
 # References
 
