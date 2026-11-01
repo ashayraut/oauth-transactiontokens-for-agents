@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-29T04:42:48.352453+00:00",
+  "timestamp": "2026-11-01T04:45:49.584481+00:00",
   "repo": "ashayraut/oauth-transactiontokens-for-agents",
   "labels": [
     {
@@ -420,24 +420,26 @@
       "id": "PR_kwDOP8bteM8AAAABLMd7vA",
       "title": "Update draft for version-3",
       "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/pull/14",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ashayraut",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Introduces significant changes including introduction of session id, updating introduction, multi-agent cases and security considerations and agent token exchange flows.",
       "createdAt": "2026-10-28T06:30:34Z",
-      "updatedAt": "2026-10-28T06:30:34Z",
+      "updatedAt": "2026-10-31T21:26:55Z",
       "baseRepository": "ashayraut/oauth-transactiontokens-for-agents",
       "baseRefName": "main",
       "baseRefOid": "1da3038a925f813081d40e9f67deed7d25e8e2ad",
       "headRepository": "ashayraut/oauth-transactiontokens-for-agents",
       "headRefName": "ashayraut-patch-7",
       "headRefOid": "6bf3d90e4ccfddd219c929b3a9c2cb243f29cfd9",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-10-31T21:26:55Z",
+      "mergedAt": "2026-10-31T21:26:54Z",
+      "mergedBy": "ashayraut",
+      "mergeCommit": {
+        "oid": "5a40b0abe1936d65d94205150f1d2d875c9083a8"
+      },
       "comments": [],
       "reviews": []
     }
