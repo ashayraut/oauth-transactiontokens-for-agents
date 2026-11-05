@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-01T04:45:49.584481+00:00",
+  "timestamp": "2026-11-05T05:29:17.224276+00:00",
   "repo": "ashayraut/oauth-transactiontokens-for-agents",
   "labels": [
     {
@@ -278,6 +278,38 @@
       "body": "List your employer or sponsor in the author/affiliation boilerplate of the document",
       "createdAt": "2026-08-23T18:25:26Z",
       "updatedAt": "2026-08-23T18:25:26Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 15,
+      "id": "I_kwDOP8bteM8AAAABcdcxVg",
+      "title": "alygn",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/15",
+      "state": "OPEN",
+      "author": "eradelaabundancia-collab",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-11-04T14:36:40Z",
+      "updatedAt": "2026-11-04T14:36:40Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 16,
+      "id": "I_kwDOP8bteM8AAAABcddP5Q",
+      "title": "al",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/16",
+      "state": "OPEN",
+      "author": "eradelaabundancia-collab",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-11-04T14:37:06Z",
+      "updatedAt": "2026-11-04T14:37:06Z",
       "closedAt": null,
       "comments": []
     }
