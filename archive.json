@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-05T05:29:17.224276+00:00",
+  "timestamp": "2026-11-08T04:49:53.904282+00:00",
   "repo": "ashayraut/oauth-transactiontokens-for-agents",
   "labels": [
     {
@@ -284,16 +284,16 @@
     {
       "number": 15,
       "id": "I_kwDOP8bteM8AAAABcdcxVg",
-      "title": "alygn",
+      "title": "Optional reference to the authorizing decision (\"why\") in agentic_ctx and the TTS audit log",
       "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/15",
       "state": "OPEN",
       "author": "eradelaabundancia-collab",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
-      "body": "",
+      "body": "Section 1 notes that audit logs \"lose the execution context that explains why those operations occurred and on whose behalf\". In -03, agentic_ctx and the TTS audit log (3.8) answer who acted and through which hops, but not which organizational decision authorized the transaction (a ticket approval, a change decision, a spending approval).\n\nProposal: an optional, opaque `decision_ref` (URI or identifier), set at initial issuance, copied unchanged through replacement like `originator`, and recorded by the TTS in the audit log entry. It would be a correlation pointer only: never dereferenced automatically, never an authorization input by itself, and safe to omit.\n\nThis would let an incident responder join the token chain to the record of who approved the work, without putting mutable business data in the token. A field-by-field comparison with a related open specification is available on request.\n\nDisclosure: I work on EAGF, an openly published candidate specification for agent authority records; this is a suggestion for discussion, not an endorsement request.",
       "createdAt": "2026-11-04T14:36:40Z",
-      "updatedAt": "2026-11-04T14:36:40Z",
+      "updatedAt": "2026-11-06T02:51:42Z",
       "closedAt": null,
       "comments": []
     },
@@ -302,14 +302,30 @@
       "id": "I_kwDOP8bteM8AAAABcddP5Q",
       "title": "al",
       "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/16",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "eradelaabundancia-collab",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2026-11-04T14:37:06Z",
-      "updatedAt": "2026-11-04T14:37:06Z",
+      "updatedAt": "2026-11-06T02:52:01Z",
+      "closedAt": "2026-11-06T02:52:01Z",
+      "comments": []
+    },
+    {
+      "number": 17,
+      "id": "I_kwDOP8bteM8AAAABdFC3Ag",
+      "title": "Clarity gaps and editorial issues",
+      "url": "https://github.com/ashayraut/oauth-transactiontokens-for-agents/issues/17",
+      "state": "OPEN",
+      "author": "ashayraut",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## 1. Missing explicit statement that `act` and `agentic_ctx` coexist at hop 1\n\n**Where:** \u00a73.4 (Txn-Token Format), \u00a73.6 (Agentic Context)\n\n**Issue:** The JSON example in \u00a73.4 shows both `act` and `agentic_ctx` populated simultaneously for a 3P agent flow, but neither \u00a73.4 nor \u00a73.6 contains a plain-language statement saying \"both claims are present at the same time in this scenario.\" A reader can easily read \u00a73.6 as defining `agentic_ctx` as a separate, later-arriving claim rather than one that coexists with `act` from the first issuance.\n\n**Suggested fix:** Add a normative or non-normative note in \u00a73.6 (or at the start of \u00a73.4) that explicitly states: for Subject-Initiated flows where the external caller is identified as an agent, both `act` (carrying the RFC 8693 delegation) and `agentic_ctx` (carrying chain context) are present in the same token from initial issuance. The `act` claim is copied from the access token; `agentic_ctx` is set by the TTS.\n\n---\n\n## 2. `act` vs `originator.id` \u2014 three cases not compared\n\n**Where:** \u00a73.6.1 (`originator` field definition)\n\n**Issue:** The only statement relating `act` to `originator.id` is: \"In flows where `act` is present, the `originator.id` value will typically match `act.sub`.\" This is true only in the 3P-agent case. The draft has three distinct cases that produce different relationships between these claims, none of which is laid out as a comparison:\n\n| Scenario | `act` | `originator.id` | Relationship |\n|----------|-------|-----------------|--------------|\n| 3P external agent acting for user | `act.sub` = 3P agent | = 3P agent | match |\n| Non-agent app acting for user + internal agents | `act.sub` = the app | = first internal agent | differ |\n| Autonomous (Client Credentials) | absent | = first internal agent | no `act` |\n\n@\n\"suggestions.md\" 106L, 7999B\n# Suggestions for draft-araut-oauth-transaction-tokens-for-agents-03\n\nClarity gaps and editorial issues identified during presentation preparation for IETF San Francisco, November 2026.\n\n\n**Where:** \u00a73.4 (Txn-Token Format), \u00a73.6 (Agentic Context)\n\n\n\n---\n\n**Where:** \u00a73.6.1 (`originator` field definition)\n\n\n| Scenario | `act` | `originator.id` | Relationship |\n| Non-agent app acting for user + internal agents | `act.sub` = the app | = first internal agent | differ |\n| Autonomous (Client Credentials) | absent | = first internal agent | no `act` |\n\n\n---\n\n**Where:** \u00a73.6 (Agentic Context), \u00a73.4 (Txn-Token Format example)\n\n\n\n\n\n**Suggested fix:** Either:\n- Collapse to a single MUST and note that deployments not enforcing chain integrity policies may choose not to validate `hop_count`, or\n- Explicitly state the consequence of the SHOULD not being followed when chain integrity policies are absent (i.e., `hop_count` becomes a lower bound only, not an accurate count), so implementors understand both paths.\n\n**Where:** \u00a73.2.1 (Subject-Initiated Flow), \u00a73.3 (Replacement Tokens)\n\n- TTS does not set `agentic_ctx` at initial issuance (no agent identified)\n- When an internal agent later requests a replacement, TTS sets `agentic_ctx` for the first time with `originator.id` = that internal agent\n- `act.sub` (the original non-agent app) now differs from `originator.id` (the first internal agent)\n\nThis scenario is likely common in enterprise deployments where AI agents are introduced incrementally into existing call chains built around traditional OAuth clients.\n\n**Suggested fix:** Add a third transaction flow sub-section (or a non-normative note in \u00a73.2) covering the non-agent app + internal agent scenario, showing how `agentic_ctx` is introduced mid-chain via replacement and why `act.sub` and `originator.id` differ in this case.\n\n---\n\n## 6. Self-cross-reference in \u00a73.3\n\n**Where:** \u00a73.3, first paragraph\n\n**Issue:** The text reads \"deployments enforcing chain integrity policies based on `hop_count` or `min_assurance_level` MUST treat such tokens as non-compliant (see Section 3.3 below).\" The cross-reference points to the same section. This appears to be an authoring artifact.\n\n**Suggested fix:** Update the reference to point to the correct section (likely \u00a73.3.1 or \u00a73.3.3 on token state transitions).\n\n---\n\n## 7. Agent Attribute Store interface is undefined but load-bearing\n\n**Where:** \u00a73.6.2 (Agent Attribute Store Queries), Security Considerations\n\n**Issue:** The Agent Attribute Store is RECOMMENDED and several normative requirements depend on it (assurance level sourcing for `min_assurance_level`, HIPAA or compliance checks by Resource Servers, originator/proximate lookups). The draft explicitly states the interface, query protocol, and response format are \"out of scope.\" This is a valid design boundary, but the draft does not reference or call for a companion specification to define it. Deployments will implement this independently, risking fragmentation.\n\n**Suggested fix:** Add a forward reference or a non-normative note acknowledging that a companion specification defining the Agent Attribute Store query protocol would improve interoperability, and invite discussion on whether the TXNTOKEN WG should adopt such a document.\n\n---\n\n## 8. `min_assurance_level` ordered set left entirely to deployments\n\n**Where:** \u00a73.6.1 (`chain_metadata.min_assurance_level` definition)\n\n**Issue:** The draft states \"deployments MUST define their own ordered set and comparison function\" and offers \"unverified\", \"low\", \"medium\", \"high\" as non-normative examples. Without a base set, Resource Servers and TTS implementations across organizations cannot express portable policies (e.g., a shared service used by multiple deployments cannot write a single `min_assurance_level >= \"medium\"` policy).\n\n**Suggested fix:** Define a RECOMMENDED base ordered set (e.g., `unverified < low < medium < high`) that deployments MAY use or extend. Mark it as a recommendation, not a requirement, to preserve deployment flexibility while enabling portable policy expression.",
+      "createdAt": "2026-11-06T16:22:24Z",
+      "updatedAt": "2026-11-06T16:22:24Z",
       "closedAt": null,
       "comments": []
     }
